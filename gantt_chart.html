@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wykres Gantta – PBL_S1_Dokumentacja</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f8fafc;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --etap-bar: #1e293b;
+    --parent-bar: #2563eb;
+    --leaf-bar: #3b82f6;
+    --inferred-bar: #94a3b8;
+    --dep-arrow: #dc2626;
+    --dep-arrow-hover: #b91c1c;
+    --hier-arrow: #64748b;
+    --row-hover: #f1f5f9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+  }
+
+  .header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .header .subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    background: var(--surface);
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  select, button, input[type="checkbox"] {
+    font-size: 13px;
+    cursor: pointer;
+  }
+  select {
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 3px 6px;
+    background: #fff;
+  }
+  .btn {
+    background: #0f172a;
+    color: #fff;
+    border: none;
+    padding: 6px 11px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  .btn:hover { opacity: 0.9; }
+  .btn-secondary {
+    background: #fff;
+    color: #0f172a;
+    border: 1px solid var(--border-strong);
+  }
+  .btn-secondary:hover {
+    background: #f1f5f9;
+  }
+  .btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  .notice {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: #9a3412;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 14px;
+    display: none;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    align-items: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .swatch {
+    width: 14px;
+    height: 10px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .line-swatch {
+    width: 24px;
+    height: 0;
+    border-top: 2px solid var(--dep-arrow);
+    display: inline-block;
+    position: relative;
+  }
+
+  .gantt-wrapper {
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    overflow: auto;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .tree-toggle {
+    cursor: pointer;
+    user-select: none;
+  }
+  .tree-toggle:hover rect.toggle-hit {
+    fill: #e2e8f0;
+  }
+
+  .deps-summary {
+    margin-top: 20px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    background: var(--surface);
+  }
+  .deps-summary h3 {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .deps-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 8px;
+    font-size: 13px;
+  }
+  .dep-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dep-arrow-badge {
+    color: var(--dep-arrow);
+    font-weight: 700;
+  }
+
+  #tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: rgba(15, 23, 42, 0.95);
+    color: #fff;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.45;
+    z-index: 1000;
+    display: none;
+    max-width: 340px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  @media print {
+    .controls, .notice { display: none !important; }
+    body { padding: 0; }
+    .gantt-wrapper { border: none; overflow: visible; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1 id="project-title">Wykres Gantta</h1>
+    <div class="subtitle" id="project-stats"></div>
+  </div>
+  <div class="controls">
+    <div class="control-group">
+      <span>Drzewo WBS:</span>
+      <button class="btn btn-secondary btn-sm" onclick="expandAll()" title="Pokaż wszystkie poziomy podzadań">Rozwiń wszystko</button>
+      <button class="btn btn-secondary btn-sm" onclick="collapseToDepth(1)" title="Pokaż Etapy i główne zadania (schowaj podzadania 3. i 4. poziomu)">Poziom 2 (Sekcje)</button>
+      <button class="btn btn-secondary btn-sm" onclick="collapseToDepth(0)" title="Zwiń wszystko do samych Etapów głównych">Tylko Etapy</button>
+    </div>
+    <div class="control-group">
+      <label for="filter-mode">Widok zadań:</label>
+      <select id="filter-mode">
+        <option value="dated_or_deps" selected>Z datami lub zależnościami</option>
+        <option value="deps_only">Tylko powiązane zależnościami (strzałki)</option>
+        <option value="all">Wszystkie zadania z projektu (pełny WBS)</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <input type="checkbox" id="show-dep-arrows" checked>
+      <label for="show-dep-arrows">Strzałki zależności (Blocked by / Blocking)</label>
+    </div>
+    <div class="control-group">
+      <input type="checkbox" id="show-hier-arrows">
+      <label for="show-hier-arrows">Strzałki hierarchii (Parent &rarr; Sub-issue)</label>
+    </div>
+    <div class="control-group">
+      <label for="day-width">Skala:</label>
+      <select id="day-width">
+        <option value="18">Wąska (18px)</option>
+        <option value="26" selected>Standardowa (26px)</option>
+        <option value="38">Szeroka (38px)</option>
+      </select>
+    </div>
+    <button class="btn btn-secondary" onclick="downloadSVG()">Pobierz SVG</button>
+    <button class="btn" onclick="window.print()">Drukuj / PDF</button>
+  </div>
+</div>
+
+<div id="missing-deps-notice" class="notice"></div>
+
+<div class="legend">
+  <div class="legend-item"><span class="swatch" style="background: var(--etap-bar)"></span> Etap (wyliczony z podzadań)</div>
+  <div class="legend-item"><span class="swatch" style="background: var(--parent-bar)"></span> Zadanie nadrzędne (kliknij <strong>&#9660;/&#9654;</strong> przy nazwie, aby zwinąć/rozwinąć podzadania)</div>
+  <div class="legend-item"><span class="swatch" style="background: var(--leaf-bar)"></span> Zadanie z datą Start / Target</div>
+  <div class="legend-item"><span class="swatch" style="background: var(--inferred-bar)"></span> Data odziedziczona z rodzica/etapu</div>
+  <div class="legend-item"><span class="line-swatch"></span> <strong>Strzałka zależności (Poprzednik &rarr; Następnik)</strong></div>
+  <div class="legend-item"><span class="line-swatch" style="border-top: 2px dashed var(--hier-arrow)"></span> Strzałka WBS (Parent &rarr; Sub-issue)</div>
+</div>
+
+<div class="gantt-wrapper" id="gantt-container"></div>
+
+<div class="deps-summary" id="deps-summary">
+  <h3 id="deps-title">Wykryte zależności (strzałki)</h3>
+  <div class="deps-list" id="deps-list"></div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+const RAW_DATA = {"project": {"id": "PVT_kwHOCdqmoM4Bpd3n", "number": 3, "title": "PBL_S1_Dokumentacja", "short_description": null, "url": "https://github.com/users/Matthew-Calish/projects/3", "closed": false, "owner": "Matthew-Calish", "fields": [{"id": "PVTF_lAHOCdqmoM4Bpd3nzhn5ZLw", "name": "Title", "dataType": "TITLE"}, {"id": "PVTF_lAHOCdqmoM4Bpd3nzhn5ZL4", "name": "Assignees", "dataType": "ASSIGNEES"}, {"id": "PVTSSF_lAHOCdqmoM4Bpd3nzhn5ZMA", "name": "Status", "dataType": "SINGLE_SELECT"}, {"id": "PVTF_lAHOCdqmoM4Bpd3nzhn5ZMI", "name": "Labels", "dataType": "LABELS"}, {"id": "PVTF_lAHOCdqmoM4Bpd3nzhn5ZMM", "name": "Linked pull requests", "dataType": "LINKED_PULL_REQUESTS"}, {"id": "PVTF_lAHOCdqmoM4Bpd3nzhn5ZMQ", "name": "Milestone", "dataType": "MILESTONE"}, {"id": "PVTF_lAHOCdqmoM4Bpd3nzhn5ZMU", "name": "Repository", "dataType": "REPOSITORY"}, {"id": "PVTF_lAHOCdqmoM4Bpd3nzhn5ZMg", "name": "Reviewers", "dataType": "REVIEWERS"}, {"id": "PVTF_lAHOCdqmoM4Bpd3nzhn5ZMo", "name": "Parent issue", "dataType": "PARENT_ISSUE"}, {"id": "PVTF_lAHOCdqmoM4Bpd3nzhn5ZMw", "name": "Sub-issues progress", "dataType": "SUB_ISSUES_PROGRESS"}, {"id": "PVTF_lAHOCdqmoM4Bpd3nzhn5ZM8", "name": "Created", "dataType": "CREATED"}, {"id": "PVTF_lAHOCdqmoM4Bpd3nzhn5ZNE", "name": "Updated", "dataType": "UPDATED"}, {"id": "PVTF_lAHOCdqmoM4Bpd3nzhn5ZNM", "name": "Closed", "dataType": "CLOSED"}, {"id": "PVTSSF_lAHOCdqmoM4Bpd3nzhn5Zng", "name": "Priority", "dataType": "SINGLE_SELECT"}, {"id": "PVTSSF_lAHOCdqmoM4Bpd3nzhn5Znk", "name": "Size", "dataType": "SINGLE_SELECT"}, {"id": "PVTF_lAHOCdqmoM4Bpd3nzhn5Zno", "name": "Estimate", "dataType": "NUMBER"}, {"id": "PVTF_lAHOCdqmoM4Bpd3nzhn5Zns", "name": "Start date", "dataType": "DATE"}, {"id": "PVTF_lAHOCdqmoM4Bpd3nzhn5Znw", "name": "Target date", "dataType": "DATE"}]}, "total_items": 80, "items": [{"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE0I7k", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 1, "title": "Etap 1", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/1", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-10-30T15:59:07Z", "updated_at": "2026-11-06T14:51:38Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Status": "Etap", "Title": "Etap 1"}, "milestone": {"number": 1, "title": "Określenie ram projektowych", "state": "OPEN", "due_on": "2026-11-30T00:00:00Z", "description": "", "url": "https://github.com/Matthew-Calish/mWarsztat/milestone/1"}, "parent_issue": null, "sub_issues_summary": {"total": 4, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 61, "title": "Karta projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61", "repository": "Matthew-Calish/mWarsztat"}, {"number": 65, "title": "Harmonogram realizacji dokumentacji projektowej", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65", "repository": "Matthew-Calish/mWarsztat"}, {"number": 66, "title": "Analiza projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/66", "repository": "Matthew-Calish/mWarsztat"}, {"number": 83, "title": "Mapa pojeć", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/83", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE0JCk", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 2, "title": "Etap 2", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/2", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-10-30T15:59:14Z", "updated_at": "2026-11-06T14:55:26Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Status": "Etap", "Title": "Etap 2"}, "milestone": {"number": 2, "title": "Zaprojektowanie architektury systemu", "state": "OPEN", "due_on": "2027-01-04T00:00:00Z", "description": "", "url": "https://github.com/Matthew-Calish/mWarsztat/milestone/2"}, "parent_issue": null, "sub_issues_summary": {"total": 4, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 71, "title": "Modelowanie UML", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/71", "repository": "Matthew-Calish/mWarsztat"}, {"number": 72, "title": "Zaprojektowanie architektury systemu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/72", "repository": "Matthew-Calish/mWarsztat"}, {"number": 73, "title": "Zaprojektowanie bazy danych", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/73", "repository": "Matthew-Calish/mWarsztat"}, {"number": 75, "title": "Zaprojektowanie interfejsu użytkownika", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/75", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE0JIM", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 3, "title": "Etap 3", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/3", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-10-30T15:59:20Z", "updated_at": "2026-11-06T14:54:04Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Status": "Etap", "Title": "Etap 3"}, "milestone": {"number": 3, "title": "Testy interfejsu i podsumowanie dokumentacji", "state": "OPEN", "due_on": "2027-01-22T00:00:00Z", "description": "", "url": "https://github.com/Matthew-Calish/mWarsztat/milestone/3"}, "parent_issue": null, "sub_issues_summary": {"total": 3, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 76, "title": "Analiza ryzyka", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/76", "repository": "Matthew-Calish/mWarsztat"}, {"number": 77, "title": "Podsumowanie projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/77", "repository": "Matthew-Calish/mWarsztat"}, {"number": 78, "title": "Testy interfejsu użytkownika", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/78", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7Tpg", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 5, "title": "Informacje podstawowe projektu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/5", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:42:15Z", "updated_at": "2026-11-05T18:50:00Z", "closed_at": null, "assignees": ["kanvvu", "Matthew-Calish"], "labels": ["plane"], "project_fields": {"Title": "Informacje podstawowe projektu", "Status": "Backlog", "Start date": "2026-11-05", "Target date": "2026-11-16"}, "milestone": null, "parent_issue": {"number": 61, "title": "Karta projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": [{"number": 7, "title": "Problem projektowy", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/7"}]}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7Tto", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 6, "title": "Uzasadnienie projektu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/6", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:42:25Z", "updated_at": "2026-11-05T18:50:48Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Uzasadnienie projektu", "Status": "Backlog", "Start date": "2026-12-09", "Target date": "2026-12-16"}, "milestone": null, "parent_issue": {"number": 61, "title": "Karta projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7TxQ", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 7, "title": "Problem projektowy", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/7", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:42:35Z", "updated_at": "2026-11-05T18:49:37Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Problem projektowy", "Status": "Backlog", "Start date": "2026-11-17", "Target date": "2026-11-17"}, "milestone": null, "parent_issue": {"number": 61, "title": "Karta projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [{"number": 5, "title": "Informacje podstawowe projektu", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/5"}], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7T3I", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 8, "title": "Cel główny projektu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/8", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:42:47Z", "updated_at": "2026-11-05T17:34:51Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Cel główny projektu", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 61, "title": "Karta projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7UBU", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 9, "title": "Zakres funkcjonalny projektu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/9", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:43:12Z", "updated_at": "2026-11-05T17:29:54Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Zakres funkcjonalny projektu", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 61, "title": "Karta projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7UDw", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 10, "title": "Zakres niefunkcjonalny", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/10", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:43:21Z", "updated_at": "2026-11-05T17:31:05Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Zakres niefunkcjonalny", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 61, "title": "Karta projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7UIQ", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 11, "title": "Zakres organizacyjny projektu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/11", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:43:34Z", "updated_at": "2026-11-05T17:30:45Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Zakres organizacyjny projektu", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 61, "title": "Karta projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7UMo", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 12, "title": "Produkty projektu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/12", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:43:43Z", "updated_at": "2026-11-05T17:30:15Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Produkty projektu", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 61, "title": "Karta projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7URc", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 13, "title": "Kryteria sukcesu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/13", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:43:53Z", "updated_at": "2026-11-05T17:30:38Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Kryteria sukcesu", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 61, "title": "Karta projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7UUc", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 14, "title": "Role w projekcie", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/14", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:44:01Z", "updated_at": "2026-11-05T17:30:47Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Role w projekcie", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 61, "title": "Karta projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7Uyo", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 15, "title": "WBS - etapy", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/15", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:45:21Z", "updated_at": "2026-11-05T17:30:48Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "WBS - etapy", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 65, "title": "Harmonogram realizacji dokumentacji projektowej", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7U3g", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 16, "title": "WBS - zadania", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/16", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:45:34Z", "updated_at": "2026-11-05T17:30:19Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "WBS - zadania", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 65, "title": "Harmonogram realizacji dokumentacji projektowej", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7U6c", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 17, "title": "Diagram Gantta", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/17", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:45:41Z", "updated_at": "2026-11-05T17:31:42Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Diagram Gantta", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 65, "title": "Harmonogram realizacji dokumentacji projektowej", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7U-I", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 18, "title": "Matryca odpowiedzialności", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/18", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:45:53Z", "updated_at": "2026-11-05T17:30:27Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Matryca odpowiedzialności", "Status": "Backlog", "Start date": "2026-11-10", "Target date": "2026-11-17"}, "milestone": null, "parent_issue": {"number": 65, "title": "Harmonogram realizacji dokumentacji projektowej", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7VQ0", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 19, "title": "Cel analizy interesariuszy", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/19", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:46:41Z", "updated_at": "2026-11-05T17:32:23Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Cel analizy interesariuszy", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 67, "title": "Analiza interesariuszy", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/67", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7WzQ", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 20, "title": "Identyfikacja i charakterystyka interesariuszy", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/20", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:51:31Z", "updated_at": "2026-11-05T17:32:18Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Identyfikacja i charakterystyka interesariuszy", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 67, "title": "Analiza interesariuszy", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/67", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7W50", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 21, "title": "Potrzeby, oczekiwania i wymagania interesariuszy", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/21", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:51:47Z", "updated_at": "2026-11-05T17:31:55Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Potrzeby, oczekiwania i wymagania interesariuszy", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 67, "title": "Analiza interesariuszy", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/67", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7XE8", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 22, "title": "Analiza wpływy na projekt", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/22", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:52:21Z", "updated_at": "2026-11-05T17:32:29Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Analiza wpływy na projekt", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 67, "title": "Analiza interesariuszy", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/67", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7XKo", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 23, "title": "Analiza zainteresowania projektem", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/23", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:52:33Z", "updated_at": "2026-11-05T17:32:31Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Analiza zainteresowania projektem", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 67, "title": "Analiza interesariuszy", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/67", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7XQU", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 24, "title": "Potencjalne korzyści i zagrożenia dla interesariuszy", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/24", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:52:45Z", "updated_at": "2026-11-05T17:32:54Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Potencjalne korzyści i zagrożenia dla interesariuszy", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 67, "title": "Analiza interesariuszy", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/67", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7XVM", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 25, "title": "Strategia komunikacji z interesariuszem", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/25", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:52:58Z", "updated_at": "2026-11-05T17:30:44Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Strategia komunikacji z interesariuszem", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 67, "title": "Analiza interesariuszy", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/67", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7Xgw", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 26, "title": "Priorytyzacja interesariuszy ze względu na powodzenie projekty", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/26", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:53:31Z", "updated_at": "2026-11-05T17:31:56Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Priorytyzacja interesariuszy ze względu na powodzenie projekty", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 67, "title": "Analiza interesariuszy", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/67", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7XnI", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 27, "title": "Analiza stanu obecnego", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/27", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:53:52Z", "updated_at": "2026-11-05T17:31:22Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Analiza stanu obecnego", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 68, "title": "Analiza problemu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/68", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7Xr0", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 28, "title": "Identyfikacja problemów - mapa pojęciowa", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/28", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:54:06Z", "updated_at": "2026-11-05T17:31:40Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Identyfikacja problemów - mapa pojęciowa", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 68, "title": "Analiza problemu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/68", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7Xuc", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 29, "title": "Analiza przyczyn problemów", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/29", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:54:15Z", "updated_at": "2026-11-05T17:32:09Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Analiza przyczyn problemów", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 68, "title": "Analiza problemu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/68", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7Xxg", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 30, "title": "Analiza SWOT", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/30", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:54:23Z", "updated_at": "2026-11-05T17:31:13Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Analiza SWOT", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 68, "title": "Analiza problemu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/68", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7Xz8", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 31, "title": "Opis stanu docelowego", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/31", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:54:30Z", "updated_at": "2026-11-05T17:31:01Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Opis stanu docelowego", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 68, "title": "Analiza problemu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/68", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7X60", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 32, "title": "Wymagania biznesowe", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/32", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:54:50Z", "updated_at": "2026-11-05T17:32:07Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Wymagania biznesowe", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 69, "title": "Analiza wymagań", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/69", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7YAY", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 33, "title": "Wymagania użytkowników - mapa pojęciowa", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/33", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:55:05Z", "updated_at": "2026-11-05T17:32:20Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Wymagania użytkowników - mapa pojęciowa", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 69, "title": "Analiza wymagań", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/69", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7YTU", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 34, "title": "Priorytety wymagań (MoSCoW)", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/34", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T03:55:50Z", "updated_at": "2026-11-05T17:25:51Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Priorytety wymagań (MoSCoW)", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 69, "title": "Analiza wymagań", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/69", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7oW0", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 35, "title": "Diagram przypadków użycia, szczegółowe opisy przypadków użycia", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/35", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:38:51Z", "updated_at": "2026-11-05T17:25:37Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Diagram przypadków użycia, szczegółowe opisy przypadków użycia", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 71, "title": "Modelowanie UML", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/71", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7oZw", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 36, "title": "Diagram klas", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/36", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:38:58Z", "updated_at": "2026-11-05T17:25:33Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Diagram klas", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 71, "title": "Modelowanie UML", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/71", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7oeY", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 37, "title": "Diagramy sekwencji", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/37", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:39:08Z", "updated_at": "2026-11-05T17:25:19Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Diagramy sekwencji", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 71, "title": "Modelowanie UML", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/71", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7og8", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 38, "title": "Diagram aktywności", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/38", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:39:16Z", "updated_at": "2026-11-05T17:25:22Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Diagram aktywności", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 71, "title": "Modelowanie UML", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/71", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7ojs", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 39, "title": "Diagram stanów", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/39", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:39:24Z", "updated_at": "2026-11-05T17:27:46Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Diagram stanów", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 71, "title": "Modelowanie UML", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/71", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7om0", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 40, "title": "Diagram komponentów", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/40", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:39:35Z", "updated_at": "2026-11-05T17:27:27Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Diagram komponentów", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 71, "title": "Modelowanie UML", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/71", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7op0", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 41, "title": "Diagram wdrożenia", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/41", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:39:42Z", "updated_at": "2026-11-05T17:25:42Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Diagram wdrożenia", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 71, "title": "Modelowanie UML", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/71", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7ow8", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 42, "title": "Architekura logiczna systemu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/42", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:39:59Z", "updated_at": "2026-11-05T17:25:58Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Architekura logiczna systemu", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 72, "title": "Zaprojektowanie architektury systemu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/72", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7o10", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 43, "title": "Moduły systemu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/43", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:40:11Z", "updated_at": "2026-11-05T17:25:41Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Moduły systemu", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 72, "title": "Zaprojektowanie architektury systemu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/72", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7o4M", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 44, "title": "Technologie systemu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/44", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:40:18Z", "updated_at": "2026-11-05T17:26:03Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Technologie systemu", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 72, "title": "Zaprojektowanie architektury systemu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/72", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7pbQ", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 45, "title": "Architektura kolekcji i dokumentów", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/45", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:41:57Z", "updated_at": "2026-11-05T17:26:29Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Architektura kolekcji i dokumentów", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 73, "title": "Zaprojektowanie bazy danych", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/73", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7pgM", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 46, "title": "Diagram hierarchii kolekcji", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/46", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:42:12Z", "updated_at": "2026-11-05T17:26:29Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Diagram hierarchii kolekcji", "Status": "Backlog", "Start date": "2026-11-06", "Target date": "2026-11-06"}, "milestone": null, "parent_issue": {"number": 73, "title": "Zaprojektowanie bazy danych", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/73", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7pjI", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 47, "title": "Opis powiązań danych", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/47", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:42:21Z", "updated_at": "2026-11-05T17:25:26Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Opis powiązań danych", "Status": "Backlog", "Start date": "2026-10-29", "Target date": "2026-10-29"}, "milestone": null, "parent_issue": {"number": 73, "title": "Zaprojektowanie bazy danych", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/73", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7plQ", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 48, "title": "Struktura dokumentów i typy danych Firestore", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/48", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:42:29Z", "updated_at": "2026-11-05T17:26:14Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Struktura dokumentów i typy danych Firestore", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 73, "title": "Zaprojektowanie bazy danych", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/73", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7poU", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 49, "title": "Reguły bezpieczeństwa i spójność", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/49", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:42:39Z", "updated_at": "2026-11-05T17:27:23Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Reguły bezpieczeństwa i spójność", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 73, "title": "Zaprojektowanie bazy danych", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/73", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFZtxk", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 71, "title": "Modelowanie UML", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/71", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T13:41:39Z", "updated_at": "2026-11-06T15:33:12Z", "closed_at": null, "assignees": ["kanvvu", "mesniezek", "Matthew-Calish"], "labels": ["plane"], "project_fields": {"Title": "Modelowanie UML", "Status": "Backlog", "Start date": "2026-12-01", "Target date": "2026-12-14"}, "milestone": null, "parent_issue": {"number": 2, "title": "Etap 2", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/2", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 7, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 35, "title": "Diagram przypadków użycia, szczegółowe opisy przypadków użycia", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/35", "repository": "Matthew-Calish/mWarsztat"}, {"number": 36, "title": "Diagram klas", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/36", "repository": "Matthew-Calish/mWarsztat"}, {"number": 37, "title": "Diagramy sekwencji", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/37", "repository": "Matthew-Calish/mWarsztat"}, {"number": 38, "title": "Diagram aktywności", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/38", "repository": "Matthew-Calish/mWarsztat"}, {"number": 39, "title": "Diagram stanów", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/39", "repository": "Matthew-Calish/mWarsztat"}, {"number": 40, "title": "Diagram komponentów", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/40", "repository": "Matthew-Calish/mWarsztat"}, {"number": 41, "title": "Diagram wdrożenia", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/41", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": [{"number": 75, "title": "Zaprojektowanie interfejsu użytkownika", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/75"}, {"number": 72, "title": "Zaprojektowanie architektury systemu", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/72"}, {"number": 73, "title": "Zaprojektowanie bazy danych", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/73"}]}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFZxdM", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 72, "title": "Zaprojektowanie architektury systemu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/72", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T13:44:59Z", "updated_at": "2026-11-06T15:13:00Z", "closed_at": null, "assignees": ["mesniezek"], "labels": ["plane"], "project_fields": {"Title": "Zaprojektowanie architektury systemu", "Status": "Backlog", "Start date": "2026-12-15", "Target date": "2027-01-04"}, "milestone": null, "parent_issue": {"number": 2, "title": "Etap 2", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/2", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 3, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 42, "title": "Architekura logiczna systemu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/42", "repository": "Matthew-Calish/mWarsztat"}, {"number": 43, "title": "Moduły systemu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/43", "repository": "Matthew-Calish/mWarsztat"}, {"number": 44, "title": "Technologie systemu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/44", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [{"number": 71, "title": "Modelowanie UML", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/71"}], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFZ36w", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 73, "title": "Zaprojektowanie bazy danych", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/73", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T13:51:18Z", "updated_at": "2026-11-06T15:25:53Z", "closed_at": null, "assignees": ["kanvvu"], "labels": ["plane"], "project_fields": {"Title": "Zaprojektowanie bazy danych", "Status": "Backlog", "Start date": "2026-12-15", "Target date": "2027-01-04"}, "milestone": null, "parent_issue": {"number": 2, "title": "Etap 2", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/2", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 6, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 74, "title": "Koncepcja bazy danych i wybór środowiska", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/74", "repository": "Matthew-Calish/mWarsztat"}, {"number": 45, "title": "Architektura kolekcji i dokumentów", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/45", "repository": "Matthew-Calish/mWarsztat"}, {"number": 46, "title": "Diagram hierarchii kolekcji", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/46", "repository": "Matthew-Calish/mWarsztat"}, {"number": 47, "title": "Opis powiązań danych", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/47", "repository": "Matthew-Calish/mWarsztat"}, {"number": 48, "title": "Struktura dokumentów i typy danych Firestore", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/48", "repository": "Matthew-Calish/mWarsztat"}, {"number": 49, "title": "Reguły bezpieczeństwa i spójność", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/49", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [{"number": 71, "title": "Modelowanie UML", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/71"}], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFaC0g", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 75, "title": "Zaprojektowanie interfejsu użytkownika", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/75", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T14:02:28Z", "updated_at": "2026-11-06T15:14:27Z", "closed_at": null, "assignees": ["Matthew-Calish"], "labels": ["plane"], "project_fields": {"Title": "Zaprojektowanie interfejsu użytkownika", "Status": "Backlog", "Start date": "2026-12-15", "Target date": "2027-01-04"}, "milestone": null, "parent_issue": {"number": 2, "title": "Etap 2", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/2", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 5, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 51, "title": "Role użytkowników", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/51", "repository": "Matthew-Calish/mWarsztat"}, {"number": 52, "title": "Persony użytkowników", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/52", "repository": "Matthew-Calish/mWarsztat"}, {"number": 53, "title": "Diagram nawigacji", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/53", "repository": "Matthew-Calish/mWarsztat"}, {"number": 54, "title": "Makiety ekranów", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/54", "repository": "Matthew-Calish/mWarsztat"}, {"number": 55, "title": "Opis ekranów", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/55", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [{"number": 71, "title": "Modelowanie UML", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/71"}], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7q-k", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 51, "title": "Role użytkowników", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/51", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:47:05Z", "updated_at": "2026-11-05T17:26:35Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Role użytkowników", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 75, "title": "Zaprojektowanie interfejsu użytkownika", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/75", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7rC8", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 52, "title": "Persony użytkowników", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/52", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:47:16Z", "updated_at": "2026-11-05T17:26:29Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Persony użytkowników", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 75, "title": "Zaprojektowanie interfejsu użytkownika", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/75", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7rFQ", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 53, "title": "Diagram nawigacji", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/53", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:47:24Z", "updated_at": "2026-11-05T17:25:41Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Diagram nawigacji", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 75, "title": "Zaprojektowanie interfejsu użytkownika", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/75", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7rJQ", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 54, "title": "Makiety ekranów", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/54", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:47:34Z", "updated_at": "2026-11-05T17:25:51Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Makiety ekranów", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 75, "title": "Zaprojektowanie interfejsu użytkownika", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/75", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7rLU", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 55, "title": "Opis ekranów", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/55", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:47:41Z", "updated_at": "2026-11-05T17:27:43Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Opis ekranów", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 75, "title": "Zaprojektowanie interfejsu użytkownika", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/75", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7rQE", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 56, "title": "Opis każdego ryzyka", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/56", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:47:57Z", "updated_at": "2026-11-05T17:27:30Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Opis każdego ryzyka", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 76, "title": "Analiza ryzyka", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/76", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7rT0", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 57, "title": "Określenie prawdopodobieństwa wystąpienia każdego ryzyka", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/57", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:48:10Z", "updated_at": "2026-11-05T17:26:29Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Określenie prawdopodobieństwa wystąpienia każdego ryzyka", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 76, "title": "Analiza ryzyka", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/76", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7rWk", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 58, "title": "Określenie wpływu poszczególnego ryzyka", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/58", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:48:20Z", "updated_at": "2026-11-05T17:26:04Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Określenie wpływu poszczególnego ryzyka", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 76, "title": "Analiza ryzyka", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/76", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7rZg", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 59, "title": "Opisanie reakcji na każde ryzyko", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/59", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:48:32Z", "updated_at": "2026-11-05T17:26:16Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Opisanie reakcji na każde ryzyko", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 76, "title": "Analiza ryzyka", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/76", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7-PU", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 62, "title": "Podsumowanie osiągnietych rezulatatów", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/62", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T05:34:36Z", "updated_at": "2026-11-05T17:23:50Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Podsumowanie osiągnietych rezulatatów", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 77, "title": "Podsumowanie projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/77", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7-Yk", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 63, "title": "Lista funkcjonalności do implementacji", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/63", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T05:34:58Z", "updated_at": "2026-11-05T17:22:09Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Lista funkcjonalności do implementacji", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 77, "title": "Podsumowanie projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/77", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7t5s", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 61, "title": "Karta projektu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T04:55:23Z", "updated_at": "2026-11-06T14:54:45Z", "closed_at": null, "assignees": ["kanvvu", "mesniezek", "Matthew-Calish"], "labels": ["plane"], "project_fields": {"Status": "Backlog", "Title": "Karta projektu", "Start date": "2026-10-16", "Target date": "2026-10-23"}, "milestone": {"number": 1, "title": "Określenie ram projektowych", "state": "OPEN", "due_on": "2026-11-30T00:00:00Z", "description": "", "url": "https://github.com/Matthew-Calish/mWarsztat/milestone/1"}, "parent_issue": {"number": 1, "title": "Etap 1", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/1", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 10, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 5, "title": "Informacje podstawowe projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/5", "repository": "Matthew-Calish/mWarsztat"}, {"number": 6, "title": "Uzasadnienie projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/6", "repository": "Matthew-Calish/mWarsztat"}, {"number": 7, "title": "Problem projektowy", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/7", "repository": "Matthew-Calish/mWarsztat"}, {"number": 8, "title": "Cel główny projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/8", "repository": "Matthew-Calish/mWarsztat"}, {"number": 9, "title": "Zakres funkcjonalny projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/9", "repository": "Matthew-Calish/mWarsztat"}, {"number": 10, "title": "Zakres niefunkcjonalny", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/10", "repository": "Matthew-Calish/mWarsztat"}, {"number": 11, "title": "Zakres organizacyjny projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/11", "repository": "Matthew-Calish/mWarsztat"}, {"number": 12, "title": "Produkty projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/12", "repository": "Matthew-Calish/mWarsztat"}, {"number": 13, "title": "Kryteria sukcesu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/13", "repository": "Matthew-Calish/mWarsztat"}, {"number": 14, "title": "Role w projekcie", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/14", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": [{"number": 65, "title": "Harmonogram realizacji dokumentacji projektowej", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65"}]}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFZSOA", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 65, "title": "Harmonogram realizacji dokumentacji projektowej", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T13:12:56Z", "updated_at": "2026-11-06T15:33:49Z", "closed_at": null, "assignees": ["kanvvu", "mesniezek", "Matthew-Calish"], "labels": ["plane"], "project_fields": {"Title": "Harmonogram realizacji dokumentacji projektowej", "Status": "Backlog", "Start date": "2026-10-24", "Target date": "2026-11-17"}, "milestone": null, "parent_issue": {"number": 1, "title": "Etap 1", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/1", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 4, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 15, "title": "WBS - etapy", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/15", "repository": "Matthew-Calish/mWarsztat"}, {"number": 16, "title": "WBS - zadania", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/16", "repository": "Matthew-Calish/mWarsztat"}, {"number": 17, "title": "Diagram Gantta", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/17", "repository": "Matthew-Calish/mWarsztat"}, {"number": 18, "title": "Matryca odpowiedzialności", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/18", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [{"number": 61, "title": "Karta projektu", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61"}], "blocking": [{"number": 66, "title": "Analiza projektu", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/66"}]}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFZY7k", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 66, "title": "Analiza projektu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/66", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T13:20:28Z", "updated_at": "2026-11-06T15:34:49Z", "closed_at": null, "assignees": ["kanvvu", "mesniezek", "Matthew-Calish"], "labels": ["plane"], "project_fields": {"Title": "Analiza projektu", "Status": "Backlog", "Start date": "2026-11-18", "Target date": "2026-11-30"}, "milestone": null, "parent_issue": {"number": 1, "title": "Etap 1", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/1", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 4, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 67, "title": "Analiza interesariuszy", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/67", "repository": "Matthew-Calish/mWarsztat"}, {"number": 68, "title": "Analiza problemu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/68", "repository": "Matthew-Calish/mWarsztat"}, {"number": 69, "title": "Analiza wymagań", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/69", "repository": "Matthew-Calish/mWarsztat"}, {"number": 70, "title": "Modelowanie procesów biznesowych", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/70", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [{"number": 65, "title": "Harmonogram realizacji dokumentacji projektowej", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65"}, {"number": 83, "title": "Mapa pojeć", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/83"}], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFaTe0", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 83, "title": "Mapa pojeć", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/83", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T14:17:43Z", "updated_at": "2026-11-06T15:35:39Z", "closed_at": null, "assignees": ["kanvvu", "mesniezek", "Matthew-Calish"], "labels": ["plane"], "project_fields": {"Title": "Mapa pojeć", "Status": "Backlog", "Target date": "2026-11-17", "Start date": "2026-11-10"}, "milestone": null, "parent_issue": {"number": 1, "title": "Etap 1", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/1", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": [{"number": 66, "title": "Analiza projektu", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/66"}]}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7-uY", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 64, "title": "Końcowa prezentacja dokumentacji", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/64", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "kanvvu", "created_at": "2026-10-31T05:35:41Z", "updated_at": "2026-11-05T17:22:57Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Końcowa prezentacja dokumentacji", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 77, "title": "Podsumowanie projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/77", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFaGiU", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 76, "title": "Analiza ryzyka", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/76", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T14:05:59Z", "updated_at": "2026-11-06T15:32:14Z", "closed_at": null, "assignees": ["kanvvu", "mesniezek", "Matthew-Calish"], "labels": ["plane"], "project_fields": {"Title": "Analiza ryzyka", "Status": "Backlog", "Start date": "2027-01-05", "Target date": "2027-01-12"}, "milestone": null, "parent_issue": {"number": 3, "title": "Etap 3", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/3", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 4, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 56, "title": "Opis każdego ryzyka", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/56", "repository": "Matthew-Calish/mWarsztat"}, {"number": 57, "title": "Określenie prawdopodobieństwa wystąpienia każdego ryzyka", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/57", "repository": "Matthew-Calish/mWarsztat"}, {"number": 58, "title": "Określenie wpływu poszczególnego ryzyka", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/58", "repository": "Matthew-Calish/mWarsztat"}, {"number": 59, "title": "Opisanie reakcji na każde ryzyko", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/59", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": [{"number": 77, "title": "Podsumowanie projektu", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/77"}]}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFaNIU", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 77, "title": "Podsumowanie projektu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/77", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T14:11:45Z", "updated_at": "2026-11-06T15:32:00Z", "closed_at": null, "assignees": ["kanvvu", "mesniezek", "Matthew-Calish"], "labels": ["plane"], "project_fields": {"Title": "Podsumowanie projektu", "Status": "Backlog", "Start date": "2027-01-13", "Target date": "2027-01-22"}, "milestone": null, "parent_issue": {"number": 3, "title": "Etap 3", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/3", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 3, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 62, "title": "Podsumowanie osiągnietych rezulatatów", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/62", "repository": "Matthew-Calish/mWarsztat"}, {"number": 63, "title": "Lista funkcjonalności do implementacji", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/63", "repository": "Matthew-Calish/mWarsztat"}, {"number": 64, "title": "Końcowa prezentacja dokumentacji", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/64", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [{"number": 78, "title": "Testy interfejsu użytkownika", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/78"}, {"number": 76, "title": "Analiza ryzyka", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/76"}], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFaNck", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 78, "title": "Testy interfejsu użytkownika", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/78", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T14:12:01Z", "updated_at": "2026-11-06T15:33:15Z", "closed_at": null, "assignees": ["kanvvu", "mesniezek", "Matthew-Calish"], "labels": ["plane"], "project_fields": {"Title": "Testy interfejsu użytkownika", "Status": "Backlog", "Start date": "2027-01-05", "Target date": "2027-01-12"}, "milestone": null, "parent_issue": {"number": 3, "title": "Etap 3", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/3", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 4, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 79, "title": "Znalezienie 10 testerów interfejsu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/79", "repository": "Matthew-Calish/mWarsztat"}, {"number": 80, "title": "Przygotowanie materiałów testowych", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/80", "repository": "Matthew-Calish/mWarsztat"}, {"number": 81, "title": "Przeprowadzenie testów i wyciągnięcie wniosków", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/81", "repository": "Matthew-Calish/mWarsztat"}, {"number": 82, "title": "Wprowadzenie ewentualnych poprawek", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/82", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": [{"number": 77, "title": "Podsumowanie projektu", "state": "open", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/77"}]}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFZZSc", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 67, "title": "Analiza interesariuszy", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/67", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T13:20:47Z", "updated_at": "2026-11-05T17:24:24Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Analiza interesariuszy", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 66, "title": "Analiza projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/66", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 8, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 19, "title": "Cel analizy interesariuszy", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/19", "repository": "Matthew-Calish/mWarsztat"}, {"number": 20, "title": "Identyfikacja i charakterystyka interesariuszy", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/20", "repository": "Matthew-Calish/mWarsztat"}, {"number": 21, "title": "Potrzeby, oczekiwania i wymagania interesariuszy", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/21", "repository": "Matthew-Calish/mWarsztat"}, {"number": 22, "title": "Analiza wpływy na projekt", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/22", "repository": "Matthew-Calish/mWarsztat"}, {"number": 23, "title": "Analiza zainteresowania projektem", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/23", "repository": "Matthew-Calish/mWarsztat"}, {"number": 24, "title": "Potencjalne korzyści i zagrożenia dla interesariuszy", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/24", "repository": "Matthew-Calish/mWarsztat"}, {"number": 25, "title": "Strategia komunikacji z interesariuszem", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/25", "repository": "Matthew-Calish/mWarsztat"}, {"number": 26, "title": "Priorytyzacja interesariuszy ze względu na powodzenie projekty", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/26", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFZZ9w", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 68, "title": "Analiza problemu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/68", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T13:21:27Z", "updated_at": "2026-11-05T17:24:22Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Analiza problemu", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 66, "title": "Analiza projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/66", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 5, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 27, "title": "Analiza stanu obecnego", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/27", "repository": "Matthew-Calish/mWarsztat"}, {"number": 28, "title": "Identyfikacja problemów - mapa pojęciowa", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/28", "repository": "Matthew-Calish/mWarsztat"}, {"number": 29, "title": "Analiza przyczyn problemów", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/29", "repository": "Matthew-Calish/mWarsztat"}, {"number": 30, "title": "Analiza SWOT", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/30", "repository": "Matthew-Calish/mWarsztat"}, {"number": 31, "title": "Opis stanu docelowego", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/31", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFZaKc", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 69, "title": "Analiza wymagań", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/69", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T13:21:40Z", "updated_at": "2026-11-05T17:23:34Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Analiza wymagań", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 66, "title": "Analiza projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/66", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 3, "completed": 0, "percent_completed": 0}, "sub_issues": [{"number": 32, "title": "Wymagania biznesowe", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/32", "repository": "Matthew-Calish/mWarsztat"}, {"number": 33, "title": "Wymagania użytkowników - mapa pojęciowa", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/33", "repository": "Matthew-Calish/mWarsztat"}, {"number": 34, "title": "Priorytety wymagań (MoSCoW)", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/34", "repository": "Matthew-Calish/mWarsztat"}], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFZaa0", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 70, "title": "Modelowanie procesów biznesowych", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/70", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T13:21:55Z", "updated_at": "2026-11-05T17:23:24Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Modelowanie procesów biznesowych", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 66, "title": "Analiza projektu", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/66", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFZ6KA", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 74, "title": "Koncepcja bazy danych i wybór środowiska", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/74", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T13:53:27Z", "updated_at": "2026-11-05T17:23:01Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Koncepcja bazy danych i wybór środowiska", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 73, "title": "Zaprojektowanie bazy danych", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/73", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFaPBk", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 79, "title": "Znalezienie 10 testerów interfejsu", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/79", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T14:13:34Z", "updated_at": "2026-11-05T17:22:58Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Znalezienie 10 testerów interfejsu", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 78, "title": "Testy interfejsu użytkownika", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/78", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFaPPU", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 80, "title": "Przygotowanie materiałów testowych", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/80", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T14:13:48Z", "updated_at": "2026-11-05T17:23:38Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Przygotowanie materiałów testowych", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 78, "title": "Testy interfejsu użytkownika", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/78", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFaPdk", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 81, "title": "Przeprowadzenie testów i wyciągnięcie wniosków", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/81", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T14:14:00Z", "updated_at": "2026-11-05T17:23:12Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Przeprowadzenie testów i wyciągnięcie wniosków", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 78, "title": "Testy interfejsu użytkownika", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/78", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}, {"project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFaPy4", "type": "Issue", "is_archived": false, "repository": "Matthew-Calish/mWarsztat", "number": 82, "title": "Wprowadzenie ewentualnych poprawek", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/82", "state": "OPEN", "state_reason": null, "issue_type": null, "author": "Matthew-Calish", "created_at": "2026-11-02T14:14:17Z", "updated_at": "2026-11-05T17:24:00Z", "closed_at": null, "assignees": [], "labels": ["plane"], "project_fields": {"Title": "Wprowadzenie ewentualnych poprawek", "Status": "Backlog"}, "milestone": null, "parent_issue": {"number": 78, "title": "Testy interfejsu użytkownika", "state": "OPEN", "url": "https://github.com/Matthew-Calish/mWarsztat/issues/78", "repository": "Matthew-Calish/mWarsztat"}, "sub_issues_summary": {"total": 0, "completed": 0, "percent_completed": 0}, "sub_issues": [], "relationships": {"tracked_in_issues": [], "tracked_issues": [], "linked_pull_requests": [], "blocked_by": [], "blocking": []}, "body": ""}]};
+
+// Zbiór numerów zadań, które mają aktualnie zwinięte (schowane) podzadania
+const collapsedNodes = new Set();
+
+function parseDate(str) {
+  if (!str) return null;
+  const [y, m, d] = str.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d));
+}
+
+function formatDate(dt) {
+  if (!dt) return '-';
+  return dt.toISOString().slice(0, 10);
+}
+
+function addDays(dt, days) {
+  return new Date(dt.getTime() + days * 86400000);
+}
+
+function diffDays(a, b) {
+  return Math.round((b.getTime() - a.getTime()) / 86400000);
+}
+
+function buildModel() {
+  const items = RAW_DATA.items || [];
+  const byNum = new Map();
+  items.forEach(it => {
+    if (it.number != null) byNum.set(it.number, it);
+  });
+
+  // Zbierz krawędzie zależności (A -> B oznacza: A blokuje B / B jest zablokowane przez A)
+  const depEdges = [];
+  const depEdgeSet = new Set();
+  const involvedInDeps = new Set();
+
+  items.forEach(it => {
+    const rels = it.relationships || {};
+    const blockedBy = rels.blocked_by || [];
+    const blocking = rels.blocking || [];
+
+    blockedBy.forEach(pred => {
+      if (pred && pred.number != null && byNum.has(pred.number)) {
+        const key = `${pred.number}->${it.number}`;
+        if (!depEdgeSet.has(key)) {
+          depEdgeSet.add(key);
+          depEdges.push({ from: pred.number, to: it.number, type: 'dependency' });
+          involvedInDeps.add(pred.number);
+          involvedInDeps.add(it.number);
+        }
+      }
+    });
+
+    blocking.forEach(succ => {
+      if (succ && succ.number != null && byNum.has(succ.number)) {
+        const key = `${it.number}->${succ.number}`;
+        if (!depEdgeSet.has(key)) {
+          depEdgeSet.add(key);
+          depEdges.push({ from: it.number, to: succ.number, type: 'dependency' });
+          involvedInDeps.add(it.number);
+          involvedInDeps.add(succ.number);
+        }
+      }
+    });
+  });
+
+  // Uporządkuj drzewo WBS (roots -> children)
+  const childrenMap = new Map();
+  const parentMap = new Map();
+  items.forEach(it => {
+    const pNum = it.parent_issue ? it.parent_issue.number : null;
+    if (pNum != null && byNum.has(pNum)) {
+      parentMap.set(it.number, pNum);
+      if (!childrenMap.has(pNum)) childrenMap.set(pNum, []);
+      childrenMap.get(pNum).push(it.number);
+    }
+  });
+
+  // Policz łączną liczbę wszystkich potomków w poddrzewie (do badge'a [+N] po zwinięciu)
+  const descendantCountMap = new Map();
+  function countDescendants(num) {
+    const ch = childrenMap.get(num) || [];
+    let total = 0;
+    ch.forEach(c => {
+      total += 1 + countDescendants(c);
+    });
+    descendantCountMap.set(num, total);
+    return total;
+  }
+
+  const roots = items
+    .filter(it => !it.parent_issue || !byNum.has(it.parent_issue.number))
+    .sort((a, b) => (a.number || 0) - (b.number || 0));
+
+  roots.forEach(r => countDescendants(r.number));
+
+  const ordered = [];
+  const visited = new Set();
+
+  function dfs(num, depth) {
+    if (visited.has(num)) return;
+    visited.add(num);
+    const it = byNum.get(num);
+    if (!it) return;
+    ordered.push({ item: it, depth });
+    const ch = childrenMap.get(num) || [];
+    ch.sort((a, b) => a - b);
+    ch.forEach(c => dfs(c, depth + 1));
+  }
+
+  roots.forEach(r => dfs(r.number, 0));
+  items.forEach(it => {
+    if (!visited.has(it.number)) dfs(it.number, 0);
+  });
+
+  // Wyznacz daty własne z GitHub Projects (Start date / Target date / End date)
+  const dateInfo = new Map();
+  items.forEach(it => {
+    const pf = it.project_fields || {};
+    const s = parseDate(pf['Start date'] || pf['Start Date']);
+    const e = parseDate(pf['Target date'] || pf['End date'] || pf['Target Date'] || pf['End Date']);
+    if (s || e) {
+      const start = s || e;
+      const end = (e && e >= start) ? e : start;
+      dateInfo.set(it.number, { start, end, source: 'explicit' });
+    }
+  });
+
+  // Rollup: jeśli rodzic (np. Etap 1, Etap 2) nie ma własnych dat, wylicz min(start) i max(end) z potomków
+  function computeRollup(num) {
+    const ch = childrenMap.get(num) || [];
+    let minS = null;
+    let maxE = null;
+    ch.forEach(c => {
+      const sub = computeRollup(c);
+      if (sub) {
+        if (!minS || sub.start < minS) minS = sub.start;
+        if (!maxE || sub.end > maxE) maxE = sub.end;
+      }
+    });
+    if (dateInfo.has(num)) {
+      return dateInfo.get(num);
+    }
+    if (minS && maxE) {
+      const info = { start: minS, end: maxE, source: 'rollup' };
+      dateInfo.set(num, info);
+      return info;
+    }
+    return null;
+  }
+  roots.forEach(r => computeRollup(r.number));
+
+  // Jeśli rodzic jest w relacji zależności (lub jego potomkowie są), oznacz też przodków przy filtrowaniu
+  const subtreeHasDeps = new Set(involvedInDeps);
+  function propagateDepsUp(num) {
+    let curr = parentMap.get(num);
+    while (curr != null) {
+      subtreeHasDeps.add(curr);
+      curr = parentMap.get(curr);
+    }
+  }
+  involvedInDeps.forEach(n => propagateDepsUp(n));
+
+  // Dziedziczenie w dół dla zadań bez dat (aby strzałki i widok pełnego WBS zawsze miały współrzędne)
+  const fallbackDate = parseDate('2026-11-02');
+  ordered.forEach(({ item }) => {
+    if (!dateInfo.has(item.number)) {
+      let curr = item.parent_issue ? item.parent_issue.number : null;
+      while (curr != null) {
+        if (dateInfo.has(curr)) {
+          const pInfo = dateInfo.get(curr);
+          dateInfo.set(item.number, { start: pInfo.start, end: pInfo.end, source: 'inferred' });
+          break;
+        }
+        const pItem = byNum.get(curr);
+        curr = (pItem && pItem.parent_issue) ? pItem.parent_issue.number : null;
+      }
+      if (!dateInfo.has(item.number)) {
+        dateInfo.set(item.number, { start: fallbackDate, end: addDays(fallbackDate, 3), source: 'inferred' });
+      }
+    }
+  });
+
+  return {
+    byNum,
+    ordered,
+    childrenMap,
+    parentMap,
+    descendantCountMap,
+    depEdges,
+    involvedInDeps,
+    subtreeHasDeps,
+    dateInfo
+  };
+}
+
+const MODEL = buildModel();
+
+function toggleNode(num, evt) {
+  if (evt) evt.stopPropagation();
+  if (collapsedNodes.has(num)) {
+    collapsedNodes.delete(num);
+  } else {
+    collapsedNodes.add(num);
+  }
+  render();
+}
+
+function expandAll() {
+  collapsedNodes.clear();
+  render();
+}
+
+function collapseToDepth(maxDepth) {
+  collapsedNodes.clear();
+  MODEL.ordered.forEach(({ item, depth }) => {
+    const hasChildren = (MODEL.childrenMap.get(item.number) || []).length > 0;
+    if (hasChildren && depth >= maxDepth) {
+      collapsedNodes.add(item.number);
+    }
+  });
+  render();
+}
+
+function isHiddenByCollapsedAncestor(num) {
+  let curr = MODEL.parentMap.get(num);
+  while (curr != null) {
+    if (collapsedNodes.has(curr)) return true;
+    curr = MODEL.parentMap.get(curr);
+  }
+  return false;
+}
+
+function getVisibleRepresentative(num, visibleSet) {
+  let curr = num;
+  while (curr != null) {
+    if (visibleSet.has(curr)) return curr;
+    curr = MODEL.parentMap.get(curr);
+  }
+  return null;
+}
+
+function render() {
+  const filterMode = document.getElementById('filter-mode').value;
+  const showDepArrows = document.getElementById('show-dep-arrows').checked;
+  const showHierArrows = document.getElementById('show-hier-arrows').checked;
+  const dayWidth = parseInt(document.getElementById('day-width').value, 10);
+
+  const {
+    byNum,
+    ordered,
+    childrenMap,
+    descendantCountMap,
+    depEdges,
+    involvedInDeps,
+    subtreeHasDeps,
+    dateInfo
+  } = MODEL;
+
+  // Sprawdź czy w JSON są już pobrane pola blocked_by / blocking
+  const sampleItem = ordered[0] ? ordered[0].item : null;
+  const hasBlockedByField = sampleItem && sampleItem.relationships && ('blocked_by' in sampleItem.relationships);
+  const noticeEl = document.getElementById('missing-deps-notice');
+  if (!hasBlockedByField) {
+    noticeEl.style.display = 'block';
+    noticeEl.innerHTML = '<strong>Uwaga:</strong> Obecny plik <code>project_export.json</code> został wygenerowany przed dodaniem pobierania relacji <code>Blocked by / Blocking</code>. Uruchom ponownie <code>python export_github_project.py --url "https://github.com/users/Matthew-Calish/projects/3"</code>, aby dociągnąć strzałki zależności z GitHuba!';
+  } else if (depEdges.length === 0) {
+    noticeEl.style.display = 'block';
+    noticeEl.innerHTML = 'W API GitHuba nie znaleziono jeszcze żadnych relacji <code>Blocked by / Blocking</code> dla zadań w tym projekcie. Możesz włączyć u góry opcję <strong>"Strzałki hierarchii (Parent &rarr; Sub-issue)"</strong> lub dodać relacje <em>Blocked by</em> na GitHubie i odświeżyć eksport.';
+  } else {
+    noticeEl.style.display = 'none';
+  }
+
+  // 1) Najpierw filtrujemy wg trybu widoku, a potem odrzucamy potomków zwiniętych węzłów
+  const modeFiltered = ordered.filter(({ item }) => {
+    const dInfo = dateInfo.get(item.number);
+    const hasExplicitOrRollup = dInfo && (dInfo.source === 'explicit' || dInfo.source === 'rollup');
+    const inDeps = involvedInDeps.has(item.number) || subtreeHasDeps.has(item.number);
+
+    if (filterMode === 'deps_only') {
+      return inDeps;
+    }
+    if (filterMode === 'dated_or_deps') {
+      return hasExplicitOrRollup || inDeps;
+    }
+    return true;
+  });
+
+  const modeFilteredSet = new Set(modeFiltered.map(r => r.item.number));
+
+  const visibleRows = modeFiltered.filter(({ item }) => !isHiddenByCollapsedAncestor(item.number));
+  const visibleSet = new Set(visibleRows.map(r => r.item.number));
+
+  // Zakres dat osi czasu
+  let minDate = null;
+  let maxDate = null;
+  visibleRows.forEach(({ item }) => {
+    const d = dateInfo.get(item.number);
+    if (d) {
+      if (!minDate || d.start < minDate) minDate = d.start;
+      if (!maxDate || d.end > maxDate) maxDate = d.end;
+    }
+  });
+  if (!minDate) {
+    minDate = parseDate('2026-10-28');
+    maxDate = parseDate('2026-12-20');
+  } else {
+    minDate = addDays(minDate, -3);
+    maxDate = addDays(maxDate, 5);
+  }
+
+  const totalDays = Math.max(14, diffDays(minDate, maxDate) + 1);
+  const leftColWidth = 475;
+  const headerHeight = 56;
+  const rowHeight = 36;
+  const chartWidth = leftColWidth + totalDays * dayWidth + 60;
+  const chartHeight = headerHeight + visibleRows.length * rowHeight + 30;
+
+  const svgParts = [];
+  svgParts.push(`<svg id="gantt-svg" xmlns="http://www.w3.org/2000/svg" width="${chartWidth}" height="${chartHeight}" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: block;">`);
+
+  // Definicje grotów strzałek
+  svgParts.push(`
+    <defs>
+      <marker id="arrow-dep" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+      </marker>
+      <marker id="arrow-hier" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+        <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#64748b" />
+      </marker>
+    </defs>
+  `);
+
+  // Tło nagłówka
+  svgParts.push(`<rect x="0" y="0" width="${chartWidth}" height="${headerHeight}" fill="#f8fafc" />`);
+  svgParts.push(`<line x1="0" y1="${headerHeight}" x2="${chartWidth}" y2="${headerHeight}" stroke="#cbd5e1" stroke-width="1" />`);
+  svgParts.push(`<text x="16" y="34" font-size="13" font-weight="700" fill="#0f172a">Zadanie (#ID Tytuł – kliknij &#9660;/&#9654; aby zwinąć)</text>`);
+  svgParts.push(`<text x="${leftColWidth - 145}" y="34" font-size="12" font-weight="600" fill="#64748b">Osoba</text>`);
+  svgParts.push(`<text x="${leftColWidth - 85}" y="34" font-size="12" font-weight="600" fill="#64748b">Start &rarr; Koniec</text>`);
+
+  // Siatka pionowa dni i nagłówki dat
+  for (let i = 0; i < totalDays; i++) {
+    const cur = addDays(minDate, i);
+    const x = leftColWidth + i * dayWidth;
+    const dayOfWeek = cur.getUTCDay();
+    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+    const dayNum = cur.getUTCDate();
+    const monthStr = cur.toISOString().slice(0, 7);
+
+    if (isWeekend) {
+      svgParts.push(`<rect x="${x}" y="${headerHeight}" width="${dayWidth}" height="${chartHeight - headerHeight}" fill="#f8fafc" />`);
+    }
+
+    svgParts.push(`<line x1="${x}" y1="${headerHeight - 22}" x2="${x}" y2="${chartHeight}" stroke="${dayOfWeek === 1 ? '#cbd5e1' : '#f1f5f9'}" stroke-width="1" />`);
+
+    if (dayNum === 1 || i === 0) {
+      svgParts.push(`<text x="${x + 4}" y="18" font-size="11" font-weight="700" fill="#334155">${monthStr}</text>`);
+    }
+    if (dayWidth >= 22 || dayOfWeek === 1) {
+      svgParts.push(`<text x="${x + dayWidth / 2}" y="${headerHeight - 7}" font-size="10" text-anchor="middle" fill="${isWeekend ? '#94a3b8' : '#475569'}">${String(dayNum).padStart(2, '0')}</text>`);
+    }
+  }
+
+  // Wiersze i paski zadań
+  const barCoords = new Map();
+
+  visibleRows.forEach(({ item, depth }, idx) => {
+    const y = headerHeight + idx * rowHeight;
+    const dInfo = dateInfo.get(item.number);
+    const isEtap = (item.project_fields && item.project_fields['Status'] === 'Etap') || depth === 0;
+    const allChildren = childrenMap.get(item.number) || [];
+    const visibleInModeChildren = allChildren.filter(c => modeFilteredSet.has(c));
+    const hasCollapsibleChildren = visibleInModeChildren.length > 0;
+    const isCollapsed = collapsedNodes.has(item.number);
+    const totalDesc = descendantCountMap.get(item.number) || allChildren.length;
+
+    // Tło wiersza
+    svgParts.push(`<rect x="0" y="${y}" width="${chartWidth}" height="${rowHeight}" fill="${idx % 2 === 0 ? '#ffffff' : '#fcfdff'}" opacity="0.7" />`);
+    svgParts.push(`<line x1="0" y1="${y + rowHeight}" x2="${chartWidth}" y2="${y + rowHeight}" stroke="#f1f5f9" stroke-width="1" />`);
+
+    // Wcięcie i przycisk zwijania/rozwijania drzewa
+    const indent = 12 + depth * 18;
+    const textStartX = indent + 20;
+    const rawTitle = `#${item.number} ${item.title || ''}`;
+    const reserveRight = isCollapsed ? 195 : 160;
+    const maxChars = Math.max(16, Math.floor((leftColWidth - reserveRight - textStartX) / 6.5));
+    const truncatedTitle = rawTitle.length > maxChars ? rawTitle.slice(0, maxChars - 1) + '…' : rawTitle;
+    const fontWeight = (isEtap || allChildren.length > 0) ? '600' : '400';
+    const textColor = isEtap ? '#0f172a' : (allChildren.length > 0 ? '#1e3a8a' : '#334155');
+
+    if (hasCollapsibleChildren) {
+      const iconChar = isCollapsed ? '&#9654;' : '&#9660;';
+      const badgeText = isCollapsed ? ` [+${totalDesc}]` : '';
+      svgParts.push(`
+        <g class="tree-toggle" onclick="toggleNode(${item.number}, event)">
+          <rect class="toggle-hit" x="${indent - 4}" y="${y + 4}" width="${leftColWidth - indent - 150}" height="${rowHeight - 8}" rx="4" fill="transparent" />
+          <rect x="${indent}" y="${y + 9}" width="16" height="16" rx="3" fill="${isCollapsed ? '#dbeafe' : '#f1f5f9'}" stroke="${isCollapsed ? '#93c5fd' : '#cbd5e1'}" stroke-width="1" />
+          <text x="${indent + 8}" y="${y + 20}" font-size="9" text-anchor="middle" fill="${isCollapsed ? '#1d4ed8' : '#475569'}">${iconChar}</text>
+          <text x="${textStartX}" y="${y + 22}" font-size="12" font-weight="${fontWeight}" fill="${textColor}">
+            ${escapeXml(truncatedTitle)}<tspan fill="#2563eb" font-size="11" font-weight="700">${badgeText}</tspan>
+          </text>
+        </g>
+      `);
+    } else {
+      // Kropka dla liścia (zadania bez widocznych podzadań)
+      svgParts.push(`
+        <circle cx="${indent + 8}" cy="${y + 17}" r="2.2" fill="#94a3b8" />
+        <text x="${textStartX}" y="${y + 22}" font-size="12" font-weight="${fontWeight}" fill="${textColor}">${escapeXml(truncatedTitle)}</text>
+      `);
+    }
+
+    // Ikony przypisanych osób (GitHub Avatars) w kolumnie "Osoba"
+    const assignees = item.assignees || [];
+    const avatarBaseX = leftColWidth - 145;
+    assignees.slice(0, 3).forEach((login, aIdx) => {
+      const ax = avatarBaseX + aIdx * 18;
+      const ay = y + 7;
+      const clipId = `avatar-clip-${item.number}-${aIdx}`;
+      const initials = (login || '?').slice(0, 2).toUpperCase();
+      svgParts.push(`
+        <g onmouseenter="showTooltip(event, ${item.number})" onmouseleave="hideTooltip()">
+          <clipPath id="${clipId}">
+            <circle cx="${ax + 11}" cy="${ay + 11}" r="11" />
+          </clipPath>
+          <circle cx="${ax + 11}" cy="${ay + 11}" r="11" fill="#e2e8f0" />
+          <text x="${ax + 11}" y="${ay + 14.5}" font-size="8.5" font-weight="700" text-anchor="middle" fill="#475569">${escapeXml(initials)}</text>
+          <image href="https://github.com/${encodeURIComponent(login)}.png?size=48" x="${ax}" y="${ay}" width="22" height="22" clip-path="url(#${clipId})" />
+          <circle cx="${ax + 11}" cy="${ay + 11}" r="11" fill="none" stroke="#ffffff" stroke-width="1.5" />
+          <title>${escapeXml(login)}</title>
+        </g>
+      `);
+    });
+
+    if (dInfo) {
+      const dateLabel = `${formatDate(dInfo.start).slice(5)}..${formatDate(dInfo.end).slice(5)}`;
+      svgParts.push(`<text x="${leftColWidth - 85}" y="${y + 22}" font-size="10.5" fill="#64748b">${dateLabel}</text>`);
+
+      const startOffset = diffDays(minDate, dInfo.start);
+      const durationDays = Math.max(1, diffDays(dInfo.start, dInfo.end) + 1);
+      const barX = leftColWidth + startOffset * dayWidth + 2;
+      const barW = Math.max(12, durationDays * dayWidth - 4);
+      const barY = y + (isEtap ? 10 : 8);
+      const barH = isEtap ? 16 : 20;
+
+      let fill = '#3b82f6';
+      if (isEtap) fill = '#1e293b';
+      else if (allChildren.length > 0) fill = '#2563eb';
+      else if (dInfo.source === 'inferred') fill = '#94a3b8';
+
+      barCoords.set(item.number, {
+        x: barX,
+        y: barY,
+        w: barW,
+        h: barH,
+        midY: barY + barH / 2,
+        rightX: barX + barW,
+        leftX: barX
+      });
+
+      // Małe awatary z GitHuba również bezpośrednio przy pasku na osi czasu
+      let barAvatarsSvg = '';
+      let barAvatarOffset = 0;
+      assignees.slice(0, 3).forEach((login, aIdx) => {
+        const bx = barX + barW + 6 + aIdx * 16;
+        const by = y + 9;
+        const bClipId = `bar-avatar-clip-${item.number}-${aIdx}`;
+        barAvatarsSvg += `
+          <clipPath id="${bClipId}">
+            <circle cx="${bx + 9}" cy="${by + 9}" r="9" />
+          </clipPath>
+          <image href="https://github.com/${encodeURIComponent(login)}.png?size=40" x="${bx}" y="${by}" width="18" height="18" clip-path="url(#${bClipId})" />
+          <circle cx="${bx + 9}" cy="${by + 9}" r="9" fill="none" stroke="#cbd5e1" stroke-width="1" />
+        `;
+        barAvatarOffset += 17;
+      });
+      if (barAvatarOffset > 0) barAvatarOffset += 4;
+
+      const clickAttr = hasCollapsibleChildren ? `onclick="toggleNode(${item.number}, event)" style="cursor:pointer;"` : '';
+      svgParts.push(`
+        <g class="task-bar" data-num="${item.number}" ${clickAttr} onmouseenter="showTooltip(event, ${item.number})" onmouseleave="hideTooltip()">
+          <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="4" ry="4" fill="${fill}" stroke="${involvedInDeps.has(item.number) ? '#dc2626' : 'none'}" stroke-width="${involvedInDeps.has(item.number) ? '1.5' : '0'}" />
+          ${barAvatarsSvg}
+          <text x="${barX + barW + 6 + barAvatarOffset}" y="${barY + barH - 5}" font-size="11" fill="#334155" font-weight="500">#${item.number}${isCollapsed ? ' (+' + totalDesc + ')' : ''}</text>
+        </g>
+      `);
+    }
+  });
+
+  // Linia oddzielająca tabelę od osi czasu
+  svgParts.push(`<line x1="${leftColWidth}" y1="0" x2="${leftColWidth}" y2="${chartHeight}" stroke="#cbd5e1" stroke-width="1.5" />`);
+
+  // 1) Strzałki hierarchii (Parent -> Sub-issue), jeśli włączone
+  if (showHierArrows) {
+    visibleRows.forEach(({ item }) => {
+      const pNum = item.parent_issue ? item.parent_issue.number : null;
+      if (pNum != null && barCoords.has(pNum) && barCoords.has(item.number)) {
+        const from = barCoords.get(pNum);
+        const to = barCoords.get(item.number);
+        const startX = from.leftX + 6;
+        const startY = from.midY;
+        const endX = to.leftX - 2;
+        const endY = to.midY;
+        const path = `M ${startX} ${startY} L ${startX} ${endY} L ${endX} ${endY}`;
+        svgParts.push(`<path d="${path}" fill="none" stroke="#64748b" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#arrow-hier)" opacity="0.75" />`);
+      }
+    });
+  }
+
+  // 2) Strzałki zależności (Blocked by / Blocking) – z obsługą zwiniętych gałęzi!
+  // Jeśli zadanie w relacji zostało zwinięte pod swojego rodzica, strzałka automatycznie przepina się do widocznego rodzica.
+  if (showDepArrows) {
+    const drawnPairs = new Set();
+    depEdges.forEach(edge => {
+      const visFrom = getVisibleRepresentative(edge.from, visibleSet);
+      const visTo = getVisibleRepresentative(edge.to, visibleSet);
+      if (visFrom == null || visTo == null || visFrom === visTo) return;
+      if (!barCoords.has(visFrom) || !barCoords.has(visTo)) return;
+
+      const pairKey = `${visFrom}->${visTo}`;
+      if (drawnPairs.has(pairKey)) return;
+      drawnPairs.add(pairKey);
+
+      const from = barCoords.get(visFrom);
+      const to = barCoords.get(visTo);
+
+      const x1 = from.rightX;
+      const y1 = from.midY;
+      const x2 = to.leftX;
+      const y2 = to.midY;
+
+      let dPath = '';
+      if (x2 >= x1 + 14) {
+        const midX = x1 + (x2 - x1) / 2;
+        dPath = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2 - 2} ${y2}`;
+      } else {
+        const stepOut = x1 + 12;
+        const stepBack = x2 - 12;
+        const midY = (y1 + y2) / 2;
+        dPath = `M ${x1} ${y1} L ${stepOut} ${y1} L ${stepOut} ${midY} L ${stepBack} ${midY} L ${stepBack} ${y2} L ${x2 - 2} ${y2}`;
+      }
+
+      svgParts.push(`
+        <g class="dep-arrow-group">
+          <path d="${dPath}" fill="none" stroke="#ffffff" stroke-width="4" opacity="0.85" />
+          <path d="${dPath}" fill="none" stroke="#dc2626" stroke-width="2.2" marker-end="url(#arrow-dep)" />
+          <circle cx="${x1}" cy="${y1}" r="3" fill="#dc2626" />
+        </g>
+      `);
+    });
+  }
+
+  svgParts.push(`</svg>`);
+  document.getElementById('gantt-container').innerHTML = svgParts.join('\n');
+
+  // Nagłówek i podsumowanie zależności pod wykresem
+  const pTitle = (RAW_DATA.project && RAW_DATA.project.title) ? RAW_DATA.project.title : 'Projekt GitHub';
+  document.getElementById('project-title').textContent = `Wykres Gantta – ${pTitle}`;
+  document.getElementById('project-stats').textContent =
+    `Widoczne wiersze: ${visibleRows.length} z ${ordered.length} (zwinięte węzły: ${collapsedNodes.size}) | Relacje zależności (strzałki): ${depEdges.length}`;
+
+  const depsListEl = document.getElementById('deps-list');
+  document.getElementById('deps-title').textContent = `Wykryte zależności Blocked by / Blocking (${depEdges.length})`;
+  if (depEdges.length === 0) {
+    depsListEl.innerHTML = `<div style="color: #64748b;">Brak zdefiniowanych relacji Blocked by / Blocking w wyeksportowanym pliku JSON.</div>`;
+  } else {
+    depsListEl.innerHTML = depEdges.map(e => {
+      const a = byNum.get(e.from) || {};
+      const b = byNum.get(e.to) || {};
+      return `
+        <div class="dep-card">
+          <span><strong>#${e.from}</strong> ${escapeXml(a.title || '')}</span>
+          <span class="dep-arrow-badge">&rarr; blokuje &rarr;</span>
+          <span><strong>#${e.to}</strong> ${escapeXml(b.title || '')}</span>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+function escapeXml(unsafe) {
+  return String(unsafe)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function showTooltip(evt, num) {
+  const it = MODEL.byNum.get(num);
+  if (!it) return;
+  const dInfo = MODEL.dateInfo.get(num);
+  const rels = it.relationships || {};
+  const blockedBy = (rels.blocked_by || []).map(x => `#${x.number} ${x.title}`).join('<br>• ');
+  const blocking = (rels.blocking || []).map(x => `#${x.number} ${x.title}`).join('<br>• ');
+  const parentStr = it.parent_issue ? `#${it.parent_issue.number} ${it.parent_issue.title}` : 'Brak (poziom główny)';
+  const descCount = MODEL.descendantCountMap.get(num) || 0;
+
+  let html = `<div><strong>#${it.number} ${escapeXml(it.title)}</strong></div>`;
+  html += `<div style="color:#cbd5e1; margin-top:4px;">Start: <b>${formatDate(dInfo.start)}</b> | Koniec: <b>${formatDate(dInfo.end)}</b></div>`;
+  const assignees = it.assignees || [];
+  if (assignees.length > 0) {
+    const avatarsHtml = assignees.map(u => `<span style="display:inline-flex;align-items:center;gap:4px;background:#1e293b;padding:2px 6px;border-radius:12px;margin-right:4px;"><img src="https://github.com/${encodeURIComponent(u)}.png?size=32" style="width:14px;height:14px;border-radius:50%;"/>${escapeXml(u)}</span>`).join('');
+    html += `<div style="margin-top:5px;">Przypisani: ${avatarsHtml}</div>`;
+  } else {
+    html += `<div style="color:#64748b; margin-top:2px;">Przypisani: <i>brak</i></div>`;
+  }
+  html += `<div style="color:#94a3b8; margin-top:2px;">Rodzic (Parent): ${escapeXml(parentStr)}</div>`;
+  if (descCount > 0) {
+    html += `<div style="color:#93c5fd; margin-top:2px;">Podzadania w drzewie: <b>${descCount}</b> (kliknij aby ${collapsedNodes.has(num) ? 'rozwinąć' : 'zwinąć'})</div>`;
+  }
+  if (blockedBy) html += `<div style="margin-top:6px; color:#fca5a5;"><b>Zablokowane przez (poprzednik):</b><br>• ${blockedBy}</div>`;
+  if (blocking) html += `<div style="margin-top:6px; color:#86efac;"><b>Blokuje (następnik):</b><br>• ${blocking}</div>`;
+
+  const tt = document.getElementById('tooltip');
+  tt.innerHTML = html;
+  tt.style.display = 'block';
+  tt.style.left = (evt.clientX + 14) + 'px';
+  tt.style.top = (evt.clientY + 14) + 'px';
+}
+
+function hideTooltip() {
+  document.getElementById('tooltip').style.display = 'none';
+}
+
+function downloadSVG() {
+  const svgEl = document.getElementById('gantt-svg');
+  if (!svgEl) return;
+  const serializer = new XMLSerializer();
+  let source = serializer.serializeToString(svgEl);
+  const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'gantt_chart.svg';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+document.getElementById('filter-mode').addEventListener('change', render);
+document.getElementById('show-dep-arrows').addEventListener('change', render);
+document.getElementById('show-hier-arrows').addEventListener('change', render);
+document.getElementById('day-width').addEventListener('change', render);
+
+render();
+</script>
+</body>
+</html>
