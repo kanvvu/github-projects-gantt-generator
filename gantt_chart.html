@@ -867,7 +867,7 @@ function render() {
   svgParts.push(`<line x1="0" y1="${headerHeight}" x2="${chartWidth}" y2="${headerHeight}" stroke="${T.borderStrong}" stroke-width="1" />`);
 
   const colHeaderY = milestoneBandHeight > 0 ? (headerHeight - 7) : 34;
-  svgParts.push(`<text x="16" y="${colHeaderY}" font-size="13" font-weight="700" fill="${T.textMain}">PBL Gantta (#ID Tytuł – kliknij &#9660;/&#9654; aby zwinąć)</text>`);
+  svgParts.push(`<text x="16" y="${colHeaderY}" font-size="13" font-weight="700" fill="${T.textMain}">PBL Gantta</text>`);
   svgParts.push(`<text x="${leftColWidth - 85}" y="${colHeaderY}" font-size="12" font-weight="600" fill="${T.textMuted}">Start &rarr; Koniec</text>`);
 
   // Siatka pionowa dni i nagłówki dat (Rok-Miesiąc u samej góry, a Dni pod pasem kamieni milowych)
