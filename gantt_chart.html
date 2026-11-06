@@ -16,8 +16,8 @@
     --parent-bar: #2563eb;
     --leaf-bar: #3b82f6;
     --inferred-bar: #94a3b8;
-    --dep-arrow: #dc2626;
-    --dep-arrow-hover: #b91c1c;
+    --dep-arrow: #f59e0b;
+    --dep-arrow-hover: #d97706;
     --hier-arrow: #64748b;
     --row-hover: #f1f5f9;
   }
@@ -595,11 +595,11 @@ function render() {
   // Definicje grotów strzałek
   svgParts.push(`
     <defs>
-      <marker id="arrow-dep" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-        <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+      <marker id="arrow-dep" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+        <path d="M 0 1.5 L 8.5 5 L 0 8.5 z" fill="#7c8da6" />
       </marker>
-      <marker id="arrow-hier" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-        <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#64748b" />
+      <marker id="arrow-hier" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+        <path d="M 0 1.5 L 8.5 5 L 0 8.5 z" fill="#64748b" />
       </marker>
     </defs>
   `);
@@ -636,6 +636,7 @@ function render() {
 
   // Wiersze i paski zadań
   const barCoords = new Map();
+  const topAvatarsLayer = [];
 
   visibleRows.forEach(({ item, depth }, idx) => {
     const y = headerHeight + idx * rowHeight;
@@ -763,20 +764,58 @@ function render() {
       }
 
       const clickAttr = hasCollapsibleChildren ? `onclick="toggleNode(${item.number}, event)" style="cursor:pointer;"` : '';
+      const pillRadius = barH / 2;
       svgParts.push(`
         <g class="task-bar" data-num="${item.number}" ${clickAttr} onmouseenter="showTooltip(event, ${item.number})" onmouseleave="hideTooltip()">
-          <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="6" ry="6" fill="${fill}" stroke="${involvedInDeps.has(item.number) ? '#dc2626' : 'none'}" stroke-width="${involvedInDeps.has(item.number) ? '1.5' : '0'}" />
+          <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="${pillRadius}" ry="${pillRadius}" fill="${fill}" />
           ${barTextSvg}
-          ${barAvatarsSvg}
         </g>
       `);
+      if (barAvatarsSvg) {
+        topAvatarsLayer.push(`
+          <g class="bar-avatars-top" onmouseenter="showTooltip(event, ${item.number})" onmouseleave="hideTooltip()">
+            ${barAvatarsSvg}
+          </g>
+        `);
+      }
     }
   });
 
   // Linia oddzielająca tabelę od osi czasu
   svgParts.push(`<line x1="${leftColWidth}" y1="0" x2="${leftColWidth}" y2="${chartHeight}" stroke="#cbd5e1" stroke-width="1.5" />`);
 
-  // 1) Strzałki hierarchii (Parent -> Sub-issue), jeśli włączone
+  // Funkcja budująca ścieżkę z zaokrąglonymi narożnikami (zamiast ostrych kątów 90 stopni)
+  function buildRoundedOrthogonalPath(pts, radius = 8) {
+    if (!pts || pts.length === 0) return '';
+    if (pts.length === 1) return `M ${pts[0][0]} ${pts[0][1]}`;
+    let d = `M ${pts[0][0]} ${pts[0][1]}`;
+    for (let i = 1; i < pts.length - 1; i++) {
+      const prev = pts[i - 1];
+      const curr = pts[i];
+      const next = pts[i + 1];
+      const v1x = curr[0] - prev[0];
+      const v1y = curr[1] - prev[1];
+      const v2x = next[0] - curr[0];
+      const v2y = next[1] - curr[1];
+      const len1 = Math.hypot(v1x, v1y);
+      const len2 = Math.hypot(v2x, v2y);
+      const r = Math.min(radius, len1 / 2, len2 / 2);
+      if (r < 0.5) {
+        d += ` L ${curr[0]} ${curr[1]}`;
+      } else {
+        const startCornerX = curr[0] - (v1x / len1) * r;
+        const startCornerY = curr[1] - (v1y / len1) * r;
+        const endCornerX = curr[0] + (v2x / len2) * r;
+        const endCornerY = curr[1] + (v2y / len2) * r;
+        d += ` L ${startCornerX} ${startCornerY} Q ${curr[0]} ${curr[1]} ${endCornerX} ${endCornerY}`;
+      }
+    }
+    const last = pts[pts.length - 1];
+    d += ` L ${last[0]} ${last[1]}`;
+    return d;
+  }
+
+  // 1) Strzałki hierarchii (Parent -> Sub-issue), jeśli włączone (z zaokrąglonymi narożnikami)
   if (showHierArrows) {
     visibleRows.forEach(({ item }) => {
       const pNum = item.parent_issue ? item.parent_issue.number : null;
@@ -787,16 +826,19 @@ function render() {
         const startY = from.midY;
         const endX = to.leftX - 2;
         const endY = to.midY;
-        const path = `M ${startX} ${startY} L ${startX} ${endY} L ${endX} ${endY}`;
+        const path = buildRoundedOrthogonalPath([[startX, startY], [startX, endY], [endX, endY]], 7);
         svgParts.push(`<path d="${path}" fill="none" stroke="#64748b" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#arrow-hier)" opacity="0.75" />`);
       }
     });
   }
 
-  // 2) Strzałki zależności (Blocked by / Blocking) – z obsługą zwiniętych gałęzi!
-  // Jeśli zadanie w relacji zostało zwinięte pod swojego rodzica, strzałka automatycznie przepina się do widocznego rodzica.
+  // 2) Strzałki zależności (Blocked by / Blocking) – identyczna geometria jak na referencyjnym zrzucie:
+  // Wyjście z prawego środka pastylki -> mały zaokrąglony nawrót w korytarz bezpośrednio pod/nad pastylką ->
+  // wspólna pionowa linia w dół przed docelowymi pastylkami -> zaokrąglone wejście w lewy bok pastylki.
   if (showDepArrows) {
     const drawnPairs = new Set();
+    const depStrokes = [];
+
     depEdges.forEach(edge => {
       const visFrom = getVisibleRepresentative(edge.from, visibleSet);
       const visTo = getVisibleRepresentative(edge.to, visibleSet);
@@ -814,26 +856,43 @@ function render() {
       const y1 = from.midY;
       const x2 = to.leftX;
       const y2 = to.midY;
+      const goingDown = y2 >= y1;
 
-      let dPath = '';
-      if (x2 >= x1 + 14) {
-        const midX = x1 + (x2 - x1) / 2;
-        dPath = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2 - 2} ${y2}`;
+      const stepOut = x1 + 14;
+      const trunkX = x2 - 14;
+      // Korytarz poziomy tuż pod (lub nad) pastylką źródłową – wspólny dla wszystkich gałęzi wychodzących z tego samego zadania!
+      const corridorY = goingDown
+        ? (from.y + from.h + (rowHeight - from.h) / 2)
+        : (from.y - (rowHeight - from.h) / 2);
+
+      let pts;
+      if (trunkX >= stepOut) {
+        // Następnik jest daleko w prawo – prosty schodek bez nawrotu
+        pts = [[x1, y1], [trunkX, y1], [trunkX, y2], [x2 - 2, y2]];
       } else {
-        const stepOut = x1 + 12;
-        const stepBack = x2 - 12;
-        const midY = (y1 + y2) / 2;
-        dPath = `M ${x1} ${y1} L ${stepOut} ${y1} L ${stepOut} ${midY} L ${stepBack} ${midY} L ${stepBack} ${y2} L ${x2 - 2} ${y2}`;
+        // Nawrót jak na zdjęciu: prawo -> w dół do korytarza pod pastylką -> w lewo do osi przed następnikiem -> w dół do następnika -> w prawo
+        pts = [
+          [x1, y1],
+          [stepOut, y1],
+          [stepOut, corridorY],
+          [trunkX, corridorY],
+          [trunkX, y2],
+          [x2 - 2, y2]
+        ];
       }
+      const dPath = buildRoundedOrthogonalPath(pts, 6);
 
-      svgParts.push(`
-        <g class="dep-arrow-group">
-          <path d="${dPath}" fill="none" stroke="#ffffff" stroke-width="4" opacity="0.85" />
-          <path d="${dPath}" fill="none" stroke="#dc2626" stroke-width="2.2" marker-end="url(#arrow-dep)" />
-          <circle cx="${x1}" cy="${y1}" r="3" fill="#dc2626" />
-        </g>
+      depStrokes.push(`
+        <path d="${dPath}" fill="none" stroke="#7c8da6" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-dep)" />
       `);
     });
+
+    svgParts.push(`<g class="dep-arrow-strokes">${depStrokes.join('\n')}</g>`);
+  }
+
+  // 3) Najwyższa warstwa: awatary z GitHuba na osi czasu (renderowane NAD strzałkami!)
+  if (topAvatarsLayer.length > 0) {
+    svgParts.push(`<g id="avatars-top-layer">${topAvatarsLayer.join('\n')}</g>`);
   }
 
   svgParts.push(`</svg>`);
