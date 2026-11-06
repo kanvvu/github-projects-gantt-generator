@@ -24,7 +24,7 @@ def generate_gantt_html(json_path: str = "project_export.json", output_html: str
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wykres Gantta – {data.get('project', {}).get('title', 'GitHub Project')}</title>
+<title>PBL Gantta – {data.get('project', {}).get('title', 'GitHub Project')}</title>
 <style>
   :root {{
     --bg: #0d1117;
@@ -255,7 +255,7 @@ def generate_gantt_html(json_path: str = "project_export.json", output_html: str
 
 <div class="header">
   <div>
-    <h1 id="project-title">Wykres Gantta</h1>
+    <h1 id="project-title">PBL Gantta</h1>
     <div class="subtitle" id="project-stats"></div>
   </div>
   <div class="controls">
@@ -302,10 +302,10 @@ def generate_gantt_html(json_path: str = "project_export.json", output_html: str
 <div id="missing-deps-notice" class="notice"></div>
 
 <div class="legend">
-  <div class="legend-item"><span class="swatch" style="background: var(--etap-bar)"></span> Etap (wyliczony z podzadań)</div>
-  <div class="legend-item"><span class="swatch" style="background: var(--parent-bar)"></span> Zadanie nadrzędne (kliknij <strong>&#9660;/&#9654;</strong> przy nazwie, aby zwinąć/rozwinąć podzadania)</div>
-  <div class="legend-item"><span class="swatch" style="background: var(--leaf-bar)"></span> Zadanie z datą Start / Target</div>
-  <div class="legend-item"><span class="swatch" style="background: var(--inferred-bar)"></span> Data odziedziczona z rodzica/etapu</div>
+  <div class="legend-item"><span class="swatch" style="background: #238636; border: 1.5px solid #3fb950;"></span> <strong>Backlog</strong></div>
+  <div class="legend-item"><span class="swatch" style="background: #9e6a03; border: 1.5px solid #d29922;"></span> <strong>In progress</strong></div>
+  <div class="legend-item"><span class="swatch" style="background: #1f6feb; border: 1.5px solid #388bfd;"></span> <strong>In review</strong></div>
+  <div class="legend-item"><span class="swatch" style="background: #8957e5; border: 1.5px solid #a371f7;"></span> <strong>Done / Closed</strong></div>
   <div class="legend-item"><span style="color: #22c55e; font-size: 14px; line-height: 1;">&#9670;</span> <strong>Kamień milowy (Milestone)</strong></div>
   <div class="legend-item"><span class="line-swatch"></span> <strong>Strzałka zależności (Poprzednik &rarr; Następnik)</strong></div>
   <div class="legend-item"><span class="line-swatch" style="border-top: 2px dashed var(--hier-arrow)"></span> Strzałka WBS (Parent &rarr; Sub-issue)</div>
@@ -607,6 +607,60 @@ const STAGE_PALETTE = [
 
 let isDarkMode = true;
 
+function getStatusStyle(item, isDark) {{
+  const pf = (item && item.project_fields) || {{}};
+  const rawStatus = pf['Status'] || (item && item.state === 'CLOSED' ? 'Done' : 'Backlog');
+  const norm = String(rawStatus).trim().toLowerCase();
+
+  if (norm === 'in progress') {{
+    return {{
+      label: rawStatus,
+      ring: '#d29922',
+      fill: isDark ? '#2b2111' : '#fef3c7',
+      badgeBg: isDark ? 'rgba(210, 153, 34, 0.14)' : '#fef3c7',
+      badgeBorder: isDark ? 'rgba(210, 153, 34, 0.4)' : '#f59e0b',
+      textColor: isDark ? '#e3b341' : '#92400e',
+      barFill: isDark ? '#9e6a03' : '#d97706',
+      barStroke: '#e3b341'
+    }};
+  }}
+  if (norm === 'in review') {{
+    return {{
+      label: rawStatus,
+      ring: '#388bfd',
+      fill: isDark ? '#12233d' : '#dbeafe',
+      badgeBg: isDark ? 'rgba(56, 139, 253, 0.14)' : '#dbeafe',
+      badgeBorder: isDark ? 'rgba(56, 139, 253, 0.4)' : '#3b82f6',
+      textColor: isDark ? '#79c0ff' : '#1e40af',
+      barFill: isDark ? '#1f6feb' : '#2563eb',
+      barStroke: '#58a6ff'
+    }};
+  }}
+  if (norm === 'done' || norm === 'closed') {{
+    return {{
+      label: rawStatus,
+      ring: '#a371f7',
+      fill: isDark ? '#271c3f' : '#f3e8ff',
+      badgeBg: isDark ? 'rgba(163, 113, 247, 0.14)' : '#f3e8ff',
+      badgeBorder: isDark ? 'rgba(163, 113, 247, 0.4)' : '#a855f7',
+      textColor: isDark ? '#d2a8ff' : '#6b21a8',
+      barFill: isDark ? '#8957e5' : '#7c3aed',
+      barStroke: '#bc8cff'
+    }};
+  }}
+  // Domyślnie: Backlog (zielony jak w GitHub Projects)
+  return {{
+    label: rawStatus,
+    ring: '#3fb950',
+    fill: isDark ? '#122d1f' : '#dcfce7',
+    badgeBg: isDark ? 'rgba(63, 185, 80, 0.14)' : '#dcfce7',
+    badgeBorder: isDark ? 'rgba(63, 185, 80, 0.4)' : '#22c55e',
+    textColor: isDark ? '#7ee787' : '#166534',
+    barFill: isDark ? '#238636' : '#16a34a',
+    barStroke: '#3fb950'
+  }};
+}}
+
 function toggleTheme() {{
   isDarkMode = !isDarkMode;
   document.body.classList.toggle('light-mode', !isDarkMode);
@@ -749,7 +803,7 @@ function render() {{
   }}
 
   const totalDays = Math.max(14, diffDays(minDate, maxDate) + 1);
-  const leftColWidth = 475;
+  const leftColWidth = 440;
   const monthRowHeight = 26;
   const milestoneBandHeight = (showMilestones && milestones.length > 0) ? 28 : 0;
   const dayRowHeight = 24;
@@ -833,8 +887,7 @@ function render() {{
   svgParts.push(`<line x1="0" y1="${{headerHeight}}" x2="${{chartWidth}}" y2="${{headerHeight}}" stroke="${{T.borderStrong}}" stroke-width="1" />`);
 
   const colHeaderY = milestoneBandHeight > 0 ? (headerHeight - 7) : 34;
-  svgParts.push(`<text x="16" y="${{colHeaderY}}" font-size="13" font-weight="700" fill="${{T.textMain}}">Zadanie (#ID Tytuł – kliknij &#9660;/&#9654; aby zwinąć)</text>`);
-  svgParts.push(`<text x="${{leftColWidth - 145}}" y="${{colHeaderY}}" font-size="12" font-weight="600" fill="${{T.textMuted}}">Osoba</text>`);
+  svgParts.push(`<text x="16" y="${{colHeaderY}}" font-size="13" font-weight="700" fill="${{T.textMain}}">PBL Gantta (#ID Tytuł – kliknij &#9660;/&#9654; aby zwinąć)</text>`);
   svgParts.push(`<text x="${{leftColWidth - 85}}" y="${{colHeaderY}}" font-size="12" font-weight="600" fill="${{T.textMuted}}">Start &rarr; Koniec</text>`);
 
   // Siatka pionowa dni i nagłówki dat (Rok-Miesiąc u samej góry, a Dni pod pasem kamieni milowych)
@@ -992,7 +1045,7 @@ function render() {{
     const indent = 12 + Math.max(0, depth - 1) * 18;
     const textStartX = indent + 20;
     const rawTitle = `#${{item.number}} ${{item.title || ''}}`;
-    const reserveRight = isCollapsed ? 195 : 160;
+    const reserveRight = isCollapsed ? 130 : 95;
     const maxChars = Math.max(16, Math.floor((leftColWidth - reserveRight - textStartX) / 6.5));
     const truncatedTitle = rawTitle.length > maxChars ? rawTitle.slice(0, maxChars - 1) + '…' : rawTitle;
     const fontWeight = allChildren.length > 0 ? '600' : '400';
@@ -1003,7 +1056,7 @@ function render() {{
       const badgeText = isCollapsed ? ` [+${{totalDesc}}]` : '';
       svgParts.push(`
         <g class="tree-toggle" onclick="toggleNode(${{item.number}}, event)">
-          <rect class="toggle-hit" x="${{indent - 4}}" y="${{y + 4}}" width="${{leftColWidth - indent - 150}}" height="${{rowHeight - 8}}" rx="4" fill="transparent" />
+          <rect class="toggle-hit" x="${{indent - 4}}" y="${{y + 4}}" width="${{leftColWidth - indent - 90}}" height="${{rowHeight - 8}}" rx="4" fill="transparent" />
           <rect x="${{indent}}" y="${{y + 9}}" width="16" height="16" rx="3" fill="${{isCollapsed ? T.toggleCollapsedBg : T.toggleBg}}" stroke="${{isCollapsed ? T.toggleCollapsedBorder : T.toggleBorder}}" stroke-width="1" />
           <text x="${{indent + 8}}" y="${{y + 20}}" font-size="9" text-anchor="middle" fill="${{isCollapsed ? T.toggleCollapsedIcon : T.toggleIcon}}">${{iconChar}}</text>
           <text x="${{textStartX}}" y="${{y + 22}}" font-size="12" font-weight="${{fontWeight}}" fill="${{textColor}}">
@@ -1019,27 +1072,8 @@ function render() {{
       `);
     }}
 
-    // Ikony przypisanych osób (GitHub Avatars) w kolumnie "Osoba"
     const assignees = item.assignees || [];
-    const avatarBaseX = leftColWidth - 145;
-    assignees.slice(0, 3).forEach((login, aIdx) => {{
-      const ax = avatarBaseX + aIdx * 18;
-      const ay = y + 7;
-      const clipId = `avatar-clip-${{item.number}}-${{aIdx}}`;
-      const initials = (login || '?').slice(0, 2).toUpperCase();
-      svgParts.push(`
-        <g onmouseenter="showTooltip(event, ${{item.number}})" onmouseleave="hideTooltip()">
-          <clipPath id="${{clipId}}">
-            <circle cx="${{ax + 11}}" cy="${{ay + 11}}" r="11" />
-          </clipPath>
-          <circle cx="${{ax + 11}}" cy="${{ay + 11}}" r="11" fill="${{T.toggleBg}}" />
-          <text x="${{ax + 11}}" y="${{ay + 14.5}}" font-size="8.5" font-weight="700" text-anchor="middle" fill="${{T.textMuted}}">${{escapeXml(initials)}}</text>
-          <image href="https://github.com/${{encodeURIComponent(login)}}.png?size=48" x="${{ax}}" y="${{ay}}" width="22" height="22" clip-path="url(#${{clipId}})" />
-          <circle cx="${{ax + 11}}" cy="${{ay + 11}}" r="11" fill="none" stroke="${{T.avatarRing}}" stroke-width="1.5" />
-          <title>${{escapeXml(login)}}</title>
-        </g>
-      `);
-    }});
+    const st = getStatusStyle(item, isDarkMode);
 
     if (dInfo) {{
       const dateLabel = `${{formatDate(dInfo.start).slice(5)}}..${{formatDate(dInfo.end).slice(5)}}`;
@@ -1052,9 +1086,9 @@ function render() {{
       const barY = y + 7;
       const barH = 22;
 
-      let fill = pal.leafFill;
-      if (allChildren.length > 0) fill = pal.parentFill;
-      else if (dInfo.source === 'inferred') fill = '#475569';
+      // Kolor pastylki na wykresie bezpośrednio nawiązuje do jej stanu (Statusu) z GitHuba
+      const fill = st.barFill;
+      const barStroke = st.barStroke;
 
       barCoords.set(item.number, {{
         x: barX,
@@ -1102,7 +1136,7 @@ function render() {{
       const pillRadius = barH / 2;
       svgParts.push(`
         <g class="task-bar" data-num="${{item.number}}" ${{clickAttr}} onmouseenter="showTooltip(event, ${{item.number}})" onmouseleave="hideTooltip()">
-          <rect x="${{barX}}" y="${{barY}}" width="${{barW}}" height="${{barH}}" rx="${{pillRadius}}" ry="${{pillRadius}}" fill="${{fill}}" />
+          <rect x="${{barX}}" y="${{barY}}" width="${{barW}}" height="${{barH}}" rx="${{pillRadius}}" ry="${{pillRadius}}" fill="${{fill}}" stroke="${{barStroke}}" stroke-width="1.2" />
           ${{barTextSvg}}
         </g>
       `);
@@ -1271,7 +1305,7 @@ function render() {{
 
   // Nagłówek i podsumowanie zależności pod wykresem
   const pTitle = (RAW_DATA.project && RAW_DATA.project.title) ? RAW_DATA.project.title : 'Projekt GitHub';
-  document.getElementById('project-title').textContent = `Wykres Gantta – ${{pTitle}}`;
+  document.getElementById('project-title').textContent = `PBL Gantta – ${{pTitle}}`;
   document.getElementById('project-stats').textContent =
     `Widoczne wiersze: ${{visibleRows.length}} z ${{ordered.length}} (zwinięte węzły: ${{collapsedNodes.size}}) | Relacje zależności (strzałki): ${{depEdges.length}}`;
 
@@ -1313,7 +1347,9 @@ function showTooltip(evt, num) {{
   const parentStr = it.parent_issue ? `#${{it.parent_issue.number}} ${{it.parent_issue.title}}` : 'Brak (poziom główny)';
   const descCount = MODEL.descendantCountMap.get(num) || 0;
 
+  const st = getStatusStyle(it, true);
   let html = `<div><strong>#${{it.number}} ${{escapeXml(it.title)}}</strong></div>`;
+  html += `<div style="color:#cbd5e1; margin-top:4px;">Stan: <span style="display:inline-flex;align-items:center;gap:5px;padding:1px 8px;border-radius:10px;background:${{st.badgeBg}};border:1px solid ${{st.badgeBorder}};color:${{st.textColor}};font-weight:600;"><span style="width:8px;height:8px;border-radius:50%;background:${{st.fill}};border:2px solid ${{st.ring}};display:inline-block;"></span>${{escapeXml(st.label)}}</span></div>`;
   html += `<div style="color:#cbd5e1; margin-top:4px;">Start: <b>${{formatDate(dInfo.start)}}</b> | Koniec: <b>${{formatDate(dInfo.end)}}</b></div>`;
   const assignees = it.assignees || [];
   if (assignees.length > 0) {{
