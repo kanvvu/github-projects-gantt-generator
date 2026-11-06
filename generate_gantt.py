@@ -274,6 +274,10 @@ def generate_gantt_html(json_path: str = "project_export.json", output_html: str
       </select>
     </div>
     <div class="control-group">
+      <input type="checkbox" id="show-milestones" checked>
+      <label for="show-milestones">Kamienie milowe (◆)</label>
+    </div>
+    <div class="control-group">
       <input type="checkbox" id="show-dep-arrows" checked>
       <label for="show-dep-arrows">Strzałki zależności (Blocked by / Blocking)</label>
     </div>
@@ -302,6 +306,7 @@ def generate_gantt_html(json_path: str = "project_export.json", output_html: str
   <div class="legend-item"><span class="swatch" style="background: var(--parent-bar)"></span> Zadanie nadrzędne (kliknij <strong>&#9660;/&#9654;</strong> przy nazwie, aby zwinąć/rozwinąć podzadania)</div>
   <div class="legend-item"><span class="swatch" style="background: var(--leaf-bar)"></span> Zadanie z datą Start / Target</div>
   <div class="legend-item"><span class="swatch" style="background: var(--inferred-bar)"></span> Data odziedziczona z rodzica/etapu</div>
+  <div class="legend-item"><span style="color: #22c55e; font-size: 14px; line-height: 1;">&#9670;</span> <strong>Kamień milowy (Milestone)</strong></div>
   <div class="legend-item"><span class="line-swatch"></span> <strong>Strzałka zależności (Poprzednik &rarr; Następnik)</strong></div>
   <div class="legend-item"><span class="line-swatch" style="border-top: 2px dashed var(--hier-arrow)"></span> Strzałka WBS (Parent &rarr; Sub-issue)</div>
 </div>
@@ -521,6 +526,30 @@ function buildModel() {{
     }}
   }});
 
+  // Zbierz unikalne kamienie milowe (Milestones) z zadań projektu
+  const milestonesMap = new Map();
+  items.forEach(it => {{
+    const m = it.milestone;
+    if (m && m.due_on) {{
+      const dueStr = m.due_on.slice(0, 10);
+      const dueDate = parseDate(dueStr);
+      const key = m.number != null ? m.number : m.title;
+      if (dueDate && !milestonesMap.has(key)) {{
+        milestonesMap.set(key, {{
+          number: m.number,
+          title: m.title || 'Milestone',
+          state: m.state || 'OPEN',
+          dueStr,
+          dueDate,
+          url: m.url
+        }});
+      }}
+    }}
+  }});
+  const milestones = Array.from(milestonesMap.values()).sort(
+    (a, b) => a.dueDate.getTime() - b.dueDate.getTime()
+  );
+
   return {{
     byNum,
     roots,
@@ -532,7 +561,8 @@ function buildModel() {{
     depEdges,
     involvedInDeps,
     subtreeHasDeps,
-    dateInfo
+    dateInfo,
+    milestones
   }};
 }}
 
@@ -635,6 +665,7 @@ function getVisibleRepresentative(num, visibleSet) {{
 
 function render() {{
   const filterMode = document.getElementById('filter-mode').value;
+  const showMilestones = document.getElementById('show-milestones') ? document.getElementById('show-milestones').checked : true;
   const showDepArrows = document.getElementById('show-dep-arrows').checked;
   const showHierArrows = document.getElementById('show-hier-arrows').checked;
   const dayWidth = parseInt(document.getElementById('day-width').value, 10);
@@ -649,7 +680,8 @@ function render() {{
     depEdges,
     involvedInDeps,
     subtreeHasDeps,
-    dateInfo
+    dateInfo,
+    milestones
   }} = MODEL;
 
   // Sprawdź czy w JSON są już pobrane pola blocked_by / blocking
@@ -692,7 +724,7 @@ function render() {{
     ...visibleRows.map(r => r.item.number)
   ]);
 
-  // Zakres dat osi czasu (uwzględniając zarówno etapy, jak i widoczne zadania)
+  // Zakres dat osi czasu (uwzględniając zarówno etapy, widoczne zadania, jak i kamienie milowe)
   let minDate = null;
   let maxDate = null;
   [...stageItems, ...visibleRows.map(r => r.item)].forEach(item => {{
@@ -702,6 +734,12 @@ function render() {{
       if (!maxDate || d.end > maxDate) maxDate = d.end;
     }}
   }});
+  if (showMilestones) {{
+    milestones.forEach(m => {{
+      if (!minDate || m.dueDate < minDate) minDate = m.dueDate;
+      if (!maxDate || m.dueDate > maxDate) maxDate = m.dueDate;
+    }});
+  }}
   if (!minDate) {{
     minDate = parseDate('2026-10-28');
     maxDate = parseDate('2026-12-20');
@@ -712,7 +750,10 @@ function render() {{
 
   const totalDays = Math.max(14, diffDays(minDate, maxDate) + 1);
   const leftColWidth = 475;
-  const headerHeight = 56;
+  const monthRowHeight = 26;
+  const milestoneBandHeight = (showMilestones && milestones.length > 0) ? 28 : 0;
+  const dayRowHeight = 24;
+  const headerHeight = monthRowHeight + milestoneBandHeight + dayRowHeight;
   const stageBandHeight = 40;
   const rowsStartY = headerHeight + stageBandHeight;
   const rowHeight = 36;
@@ -790,11 +831,13 @@ function render() {{
   svgParts.push(`<rect x="0" y="0" width="${{chartWidth}}" height="${{chartHeight}}" fill="${{T.bg}}" />`);
   svgParts.push(`<rect x="0" y="0" width="${{chartWidth}}" height="${{headerHeight}}" fill="${{T.headerBg}}" />`);
   svgParts.push(`<line x1="0" y1="${{headerHeight}}" x2="${{chartWidth}}" y2="${{headerHeight}}" stroke="${{T.borderStrong}}" stroke-width="1" />`);
-  svgParts.push(`<text x="16" y="34" font-size="13" font-weight="700" fill="${{T.textMain}}">Zadanie (#ID Tytuł – kliknij &#9660;/&#9654; aby zwinąć)</text>`);
-  svgParts.push(`<text x="${{leftColWidth - 145}}" y="34" font-size="12" font-weight="600" fill="${{T.textMuted}}">Osoba</text>`);
-  svgParts.push(`<text x="${{leftColWidth - 85}}" y="34" font-size="12" font-weight="600" fill="${{T.textMuted}}">Start &rarr; Koniec</text>`);
 
-  // Siatka pionowa dni i nagłówki dat
+  const colHeaderY = milestoneBandHeight > 0 ? (headerHeight - 7) : 34;
+  svgParts.push(`<text x="16" y="${{colHeaderY}}" font-size="13" font-weight="700" fill="${{T.textMain}}">Zadanie (#ID Tytuł – kliknij &#9660;/&#9654; aby zwinąć)</text>`);
+  svgParts.push(`<text x="${{leftColWidth - 145}}" y="${{colHeaderY}}" font-size="12" font-weight="600" fill="${{T.textMuted}}">Osoba</text>`);
+  svgParts.push(`<text x="${{leftColWidth - 85}}" y="${{colHeaderY}}" font-size="12" font-weight="600" fill="${{T.textMuted}}">Start &rarr; Koniec</text>`);
+
+  // Siatka pionowa dni i nagłówki dat (Rok-Miesiąc u samej góry, a Dni pod pasem kamieni milowych)
   for (let i = 0; i < totalDays; i++) {{
     const cur = addDays(minDate, i);
     const x = leftColWidth + i * dayWidth;
@@ -807,7 +850,7 @@ function render() {{
       svgParts.push(`<rect x="${{x}}" y="${{headerHeight}}" width="${{dayWidth}}" height="${{chartHeight - headerHeight}}" fill="${{T.weekendBg}}" />`);
     }}
 
-    svgParts.push(`<line x1="${{x}}" y1="${{headerHeight - 22}}" x2="${{x}}" y2="${{chartHeight}}" stroke="${{dayOfWeek === 1 ? T.gridMonday : T.gridDay}}" stroke-width="1" />`);
+    svgParts.push(`<line x1="${{x}}" y1="${{headerHeight - dayRowHeight}}" x2="${{x}}" y2="${{chartHeight}}" stroke="${{dayOfWeek === 1 ? T.gridMonday : T.gridDay}}" stroke-width="1" />`);
 
     if (dayNum === 1 || i === 0) {{
       svgParts.push(`<text x="${{x + 4}}" y="18" font-size="11" font-weight="700" fill="${{T.textMain}}">${{monthStr}}</text>`);
@@ -831,6 +874,39 @@ function render() {{
     svgParts.push(`<line x1="${{zoneX}}" y1="${{headerHeight}}" x2="${{zoneX}}" y2="${{chartHeight}}" stroke="${{pal.border}}" stroke-width="1.3" stroke-dasharray="6 4" opacity="0.55" />`);
     svgParts.push(`<line x1="${{zoneX + zoneW}}" y1="${{headerHeight}}" x2="${{zoneX + zoneW}}" y2="${{chartHeight}}" stroke="${{pal.border}}" stroke-width="1.3" stroke-dasharray="6 4" opacity="0.55" />`);
   }});
+
+  // PAS KAMIENI MILOWYCH (Milestones) – POD ROKIEM/MIESIĄCEM, A NAD DNIAMI (kolor zielony)
+  if (showMilestones && milestones.length > 0) {{
+    const mBandY = monthRowHeight;
+    const mMidY = mBandY + milestoneBandHeight / 2;
+    const mBadgeBg = isDarkMode ? 'rgba(34, 197, 94, 0.20)' : '#dcfce7';
+    const mBadgeText = isDarkMode ? '#86efac' : '#166534';
+    const mBadgeBorder = '#22c55e';
+
+    svgParts.push(`<line x1="0" y1="${{mBandY}}" x2="${{chartWidth}}" y2="${{mBandY}}" stroke="${{T.rowLine}}" stroke-width="1" />`);
+    svgParts.push(`<line x1="0" y1="${{mBandY + milestoneBandHeight}}" x2="${{chartWidth}}" y2="${{mBandY + milestoneBandHeight}}" stroke="${{T.rowLine}}" stroke-width="1" />`);
+    svgParts.push(`<text x="16" y="${{mBandY + 18}}" font-size="11.5" font-weight="700" fill="${{mBadgeText}}">&#9670; Kamienie milowe (${{milestones.length}}):</text>`);
+
+    milestones.forEach((m, mIdx) => {{
+      const dueOffset = diffDays(minDate, m.dueDate) + 1;
+      const mX = leftColWidth + dueOffset * dayWidth;
+      const labelStr = `#${{m.number}} ${{m.title}} (${{m.dueStr}})`;
+      const badgeW = Math.min(360, Math.max(120, labelStr.length * 6.0 + 18));
+      const badgeX = Math.max(leftColWidth + 4, mX - badgeW - 9);
+
+      // Pionowa zielona linia przerywana kamienia milowego od pasa kamieni milowych przez cały wykres
+      svgParts.push(`<line x1="${{mX}}" y1="${{mMidY}}" x2="${{mX}}" y2="${{chartHeight}}" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.8" />`);
+
+      // Zielona pastylka opisu kamienia milowego oraz zielony romb ◆ na linii docelowej daty
+      svgParts.push(`
+        <g class="milestone-marker" style="cursor:pointer;" onmouseenter="showMilestoneTooltip(event, ${{mIdx}})" onmouseleave="hideTooltip()">
+          <rect x="${{badgeX}}" y="${{mBandY + 3}}" width="${{badgeW}}" height="22" rx="11" fill="${{mBadgeBg}}" stroke="${{mBadgeBorder}}" stroke-width="1.2" />
+          <text x="${{badgeX + badgeW / 2}}" y="${{mBandY + 17.5}}" font-size="10.5" font-weight="600" text-anchor="middle" fill="${{mBadgeText}}">${{escapeXml(labelStr)}}</text>
+          <polygon points="${{mX}},${{mMidY - 6.5}} ${{mX + 6.5}},${{mMidY}} ${{mX}},${{mMidY + 6.5}} ${{mX - 6.5}},${{mMidY}}" fill="#22c55e" stroke="${{isDarkMode ? '#0d1117' : '#ffffff'}}" stroke-width="1.5" />
+        </g>
+      `);
+    }});
+  }}
 
   // Wiersze i paski zadań
   const barCoords = new Map();
@@ -1247,12 +1323,28 @@ function showTooltip(evt, num) {{
     html += `<div style="color:#64748b; margin-top:2px;">Przypisani: <i>brak</i></div>`;
   }}
   html += `<div style="color:#94a3b8; margin-top:2px;">Rodzic (Parent): ${{escapeXml(parentStr)}}</div>`;
+  if (it.milestone && it.milestone.title) {{
+    const mDue = it.milestone.due_on ? ` (${{it.milestone.due_on.slice(0, 10)}})` : '';
+    html += `<div style="color:#86efac; margin-top:3px;">&#9670; Kamień milowy: <b>#${{it.milestone.number}} ${{escapeXml(it.milestone.title)}}${{mDue}}</b></div>`;
+  }}
   if (descCount > 0) {{
     html += `<div style="color:#93c5fd; margin-top:2px;">Podzadania w drzewie: <b>${{descCount}}</b> (kliknij aby ${{collapsedNodes.has(num) ? 'rozwinąć' : 'zwinąć'}})</div>`;
   }}
   if (blockedBy) html += `<div style="margin-top:6px; color:#fca5a5;"><b>Zablokowane przez (poprzednik):</b><br>• ${{blockedBy}}</div>`;
   if (blocking) html += `<div style="margin-top:6px; color:#86efac;"><b>Blokuje (następnik):</b><br>• ${{blocking}}</div>`;
 
+  const tt = document.getElementById('tooltip');
+  tt.innerHTML = html;
+  tt.style.display = 'block';
+  tt.style.left = (evt.clientX + 14) + 'px';
+  tt.style.top = (evt.clientY + 14) + 'px';
+}}
+
+function showMilestoneTooltip(evt, mIdx) {{
+  const m = MODEL.milestones[mIdx];
+  if (!m) return;
+  let html = `<div style="color:#86efac;"><strong>&#9670; Kamień milowy #${{m.number}}: ${{escapeXml(m.title)}}</strong></div>`;
+  html += `<div style="color:#cbd5e1; margin-top:4px;">Termin (Due date): <b>${{m.dueStr}}</b> | Status: <b>${{escapeXml(m.state)}}</b></div>`;
   const tt = document.getElementById('tooltip');
   tt.innerHTML = html;
   tt.style.display = 'block';
@@ -1280,6 +1372,7 @@ function downloadSVG() {{
 }}
 
 document.getElementById('filter-mode').addEventListener('change', render);
+document.getElementById('show-milestones').addEventListener('change', render);
 document.getElementById('show-dep-arrows').addEventListener('change', render);
 document.getElementById('show-hier-arrows').addEventListener('change', render);
 document.getElementById('day-width').addEventListener('change', render);
