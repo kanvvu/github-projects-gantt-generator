@@ -712,8 +712,8 @@ function render() {
       const durationDays = Math.max(1, diffDays(dInfo.start, dInfo.end) + 1);
       const barX = leftColWidth + startOffset * dayWidth + 2;
       const barW = Math.max(12, durationDays * dayWidth - 4);
-      const barY = y + (isEtap ? 10 : 8);
-      const barH = isEtap ? 16 : 20;
+      const barY = y + (isEtap ? 8 : 7);
+      const barH = isEtap ? 20 : 22;
 
       let fill = '#3b82f6';
       if (isEtap) fill = '#1e293b';
@@ -730,7 +730,7 @@ function render() {
         leftX: barX
       });
 
-      // Małe awatary z GitHuba również bezpośrednio przy pasku na osi czasu
+      // Małe awatary z GitHuba bezpośrednio przy pasku na osi czasu
       let barAvatarsSvg = '';
       let barAvatarOffset = 0;
       assignees.slice(0, 3).forEach((login, aIdx) => {
@@ -748,12 +748,26 @@ function render() {
       });
       if (barAvatarOffset > 0) barAvatarOffset += 4;
 
+      // Nazwa zadania na pastylce (bez #ID i bez licznika +N)
+      const cleanBarTitle = item.title || '';
+      let barTextSvg = '';
+      if (barW >= 55) {
+        const maxBarChars = Math.max(4, Math.floor((barW - 14) / 6.3));
+        const pillTitle = cleanBarTitle.length > maxBarChars
+          ? cleanBarTitle.slice(0, maxBarChars - 1) + '…'
+          : cleanBarTitle;
+        barTextSvg = `<text x="${barX + 8}" y="${barY + barH / 2 + 4}" font-size="11" fill="#ffffff" font-weight="600">${escapeXml(pillTitle)}</text>`;
+      } else {
+        // Dla bardzo krótkich (np. 1-dniowych) pastylek, gdzie tekst nie zmieści się w środku
+        barTextSvg = `<text x="${barX + barW + 6 + barAvatarOffset}" y="${barY + barH / 2 + 4}" font-size="11" fill="#334155" font-weight="500">${escapeXml(cleanBarTitle)}</text>`;
+      }
+
       const clickAttr = hasCollapsibleChildren ? `onclick="toggleNode(${item.number}, event)" style="cursor:pointer;"` : '';
       svgParts.push(`
         <g class="task-bar" data-num="${item.number}" ${clickAttr} onmouseenter="showTooltip(event, ${item.number})" onmouseleave="hideTooltip()">
-          <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="4" ry="4" fill="${fill}" stroke="${involvedInDeps.has(item.number) ? '#dc2626' : 'none'}" stroke-width="${involvedInDeps.has(item.number) ? '1.5' : '0'}" />
+          <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="6" ry="6" fill="${fill}" stroke="${involvedInDeps.has(item.number) ? '#dc2626' : 'none'}" stroke-width="${involvedInDeps.has(item.number) ? '1.5' : '0'}" />
+          ${barTextSvg}
           ${barAvatarsSvg}
-          <text x="${barX + barW + 6 + barAvatarOffset}" y="${barY + barH - 5}" font-size="11" fill="#334155" font-weight="500">#${item.number}${isCollapsed ? ' (+' + totalDesc + ')' : ''}</text>
         </g>
       `);
     }
@@ -916,7 +930,8 @@ document.getElementById('show-dep-arrows').addEventListener('change', render);
 document.getElementById('show-hier-arrows').addEventListener('change', render);
 document.getElementById('day-width').addEventListener('change', render);
 
-render();
+// Domyślnie na starcie zwijamy podzadania do widoku: Etap -> Podetapy
+collapseToDepth(1);
 </script>
 </body>
 </html>
