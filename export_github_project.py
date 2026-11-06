@@ -705,7 +705,10 @@ def main() -> None:
 
     gantt_path = f"{args.output_prefix}_gantt.html" if args.output_prefix != "project_export" else "gantt_chart.html"
     try:
-        from wykres_gantta.generate_gantt import generate_gantt_html
+        try:
+            from generate_gantt import generate_gantt_html
+        except ImportError:
+            from wykres_gantta.generate_gantt import generate_gantt_html
         gantt_abs = generate_gantt_html(json_path, gantt_path)
     except Exception as exc:
         gantt_abs = f"(Nie udało się wygenerować HTML: {exc})"

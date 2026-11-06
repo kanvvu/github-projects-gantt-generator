@@ -103,6 +103,931 @@
   "total_items": 80,
   "items": [
     {
+      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7t5s",
+      "type": "Issue",
+      "is_archived": false,
+      "repository": "Matthew-Calish/mWarsztat",
+      "number": 61,
+      "title": "Karta projektu",
+      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "issue_type": null,
+      "author": "kanvvu",
+      "created_at": "2026-10-31T04:55:23Z",
+      "updated_at": "2026-11-06T17:29:47Z",
+      "closed_at": "2026-11-06T17:29:47Z",
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
+      "labels": [
+        "plane"
+      ],
+      "project_fields": {
+        "Status": "Done",
+        "Title": "Karta projektu",
+        "Start date": "2026-10-16",
+        "Target date": "2026-10-23"
+      },
+      "milestone": {
+        "number": 1,
+        "title": "Określenie ram projektowych",
+        "state": "OPEN",
+        "due_on": "2026-11-30T00:00:00Z",
+        "description": "",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/milestone/1"
+      },
+      "parent_issue": {
+        "number": 1,
+        "title": "Etap 1",
+        "state": "OPEN",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/1",
+        "repository": "Matthew-Calish/mWarsztat"
+      },
+      "sub_issues_summary": {
+        "total": 10,
+        "completed": 10,
+        "percent_completed": 100
+      },
+      "sub_issues": [
+        {
+          "number": 5,
+          "title": "Informacje podstawowe projektu",
+          "state": "CLOSED",
+          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/5",
+          "repository": "Matthew-Calish/mWarsztat"
+        },
+        {
+          "number": 6,
+          "title": "Uzasadnienie projektu",
+          "state": "CLOSED",
+          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/6",
+          "repository": "Matthew-Calish/mWarsztat"
+        },
+        {
+          "number": 7,
+          "title": "Problem projektowy",
+          "state": "CLOSED",
+          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/7",
+          "repository": "Matthew-Calish/mWarsztat"
+        },
+        {
+          "number": 8,
+          "title": "Cel główny projektu",
+          "state": "CLOSED",
+          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/8",
+          "repository": "Matthew-Calish/mWarsztat"
+        },
+        {
+          "number": 9,
+          "title": "Zakres funkcjonalny projektu",
+          "state": "CLOSED",
+          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/9",
+          "repository": "Matthew-Calish/mWarsztat"
+        },
+        {
+          "number": 10,
+          "title": "Zakres niefunkcjonalny",
+          "state": "CLOSED",
+          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/10",
+          "repository": "Matthew-Calish/mWarsztat"
+        },
+        {
+          "number": 11,
+          "title": "Zakres organizacyjny projektu",
+          "state": "CLOSED",
+          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/11",
+          "repository": "Matthew-Calish/mWarsztat"
+        },
+        {
+          "number": 12,
+          "title": "Produkty projektu",
+          "state": "CLOSED",
+          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/12",
+          "repository": "Matthew-Calish/mWarsztat"
+        },
+        {
+          "number": 13,
+          "title": "Kryteria sukcesu",
+          "state": "CLOSED",
+          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/13",
+          "repository": "Matthew-Calish/mWarsztat"
+        },
+        {
+          "number": 14,
+          "title": "Role w projekcie",
+          "state": "CLOSED",
+          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/14",
+          "repository": "Matthew-Calish/mWarsztat"
+        }
+      ],
+      "relationships": {
+        "tracked_in_issues": [],
+        "tracked_issues": [],
+        "linked_pull_requests": [],
+        "blocked_by": [],
+        "blocking": [
+          {
+            "number": 65,
+            "title": "Harmonogram realizacji dokumentacji projektowej",
+            "state": "open",
+            "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65"
+          }
+        ]
+      },
+      "body": ""
+    },
+    {
+      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFZSOA",
+      "type": "Issue",
+      "is_archived": false,
+      "repository": "Matthew-Calish/mWarsztat",
+      "number": 65,
+      "title": "Harmonogram realizacji dokumentacji projektowej",
+      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65",
+      "state": "OPEN",
+      "state_reason": null,
+      "issue_type": null,
+      "author": "Matthew-Calish",
+      "created_at": "2026-11-02T13:12:56Z",
+      "updated_at": "2026-11-06T16:47:09Z",
+      "closed_at": null,
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
+      "labels": [
+        "plane"
+      ],
+      "project_fields": {
+        "Title": "Harmonogram realizacji dokumentacji projektowej",
+        "Status": "In progress",
+        "Start date": "2026-10-24",
+        "Target date": "2026-11-17"
+      },
+      "milestone": {
+        "number": 1,
+        "title": "Określenie ram projektowych",
+        "state": "OPEN",
+        "due_on": "2026-11-30T00:00:00Z",
+        "description": "",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/milestone/1"
+      },
+      "parent_issue": {
+        "number": 1,
+        "title": "Etap 1",
+        "state": "OPEN",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/1",
+        "repository": "Matthew-Calish/mWarsztat"
+      },
+      "sub_issues_summary": {
+        "total": 4,
+        "completed": 1,
+        "percent_completed": 25
+      },
+      "sub_issues": [
+        {
+          "number": 16,
+          "title": "Stworzenie zadań (WBS)",
+          "state": "CLOSED",
+          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/16",
+          "repository": "Matthew-Calish/mWarsztat"
+        },
+        {
+          "number": 17,
+          "title": "Utworzenie diagramu Gantta",
+          "state": "OPEN",
+          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/17",
+          "repository": "Matthew-Calish/mWarsztat"
+        },
+        {
+          "number": 18,
+          "title": "Matryca odpowiedzialności",
+          "state": "OPEN",
+          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/18",
+          "repository": "Matthew-Calish/mWarsztat"
+        },
+        {
+          "number": 85,
+          "title": "Skonfigurowanie narzędzia do tworzenia wykresu Gantta",
+          "state": "OPEN",
+          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/85",
+          "repository": "Matthew-Calish/mWarsztat"
+        }
+      ],
+      "relationships": {
+        "tracked_in_issues": [],
+        "tracked_issues": [],
+        "linked_pull_requests": [],
+        "blocked_by": [
+          {
+            "number": 61,
+            "title": "Karta projektu",
+            "state": "closed",
+            "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61"
+          }
+        ],
+        "blocking": [
+          {
+            "number": 66,
+            "title": "Analiza projektu",
+            "state": "open",
+            "url": "https://github.com/Matthew-Calish/mWarsztat/issues/66"
+          }
+        ]
+      },
+      "body": ""
+    },
+    {
+      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7U6c",
+      "type": "Issue",
+      "is_archived": false,
+      "repository": "Matthew-Calish/mWarsztat",
+      "number": 17,
+      "title": "Utworzenie diagramu Gantta",
+      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/17",
+      "state": "OPEN",
+      "state_reason": null,
+      "issue_type": null,
+      "author": "kanvvu",
+      "created_at": "2026-10-31T03:45:41Z",
+      "updated_at": "2026-11-06T16:18:06Z",
+      "closed_at": null,
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
+      "labels": [
+        "plane"
+      ],
+      "project_fields": {
+        "Title": "Utworzenie diagramu Gantta",
+        "Status": "In progress",
+        "Start date": "2026-11-06",
+        "Target date": "2026-11-09"
+      },
+      "milestone": null,
+      "parent_issue": {
+        "number": 65,
+        "title": "Harmonogram realizacji dokumentacji projektowej",
+        "state": "OPEN",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65",
+        "repository": "Matthew-Calish/mWarsztat"
+      },
+      "sub_issues_summary": {
+        "total": 0,
+        "completed": 0,
+        "percent_completed": 0
+      },
+      "sub_issues": [],
+      "relationships": {
+        "tracked_in_issues": [],
+        "tracked_issues": [],
+        "linked_pull_requests": [],
+        "blocked_by": [],
+        "blocking": []
+      },
+      "body": ""
+    },
+    {
+      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhGnM9s",
+      "type": "Issue",
+      "is_archived": false,
+      "repository": "Matthew-Calish/mWarsztat",
+      "number": 85,
+      "title": "Skonfigurowanie narzędzia do tworzenia wykresu Gantta",
+      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/85",
+      "state": "OPEN",
+      "state_reason": null,
+      "issue_type": null,
+      "author": "Matthew-Calish",
+      "created_at": "2026-11-06T16:17:42Z",
+      "updated_at": "2026-11-06T16:17:57Z",
+      "closed_at": null,
+      "assignees": [
+        "kanvvu"
+      ],
+      "labels": [],
+      "project_fields": {
+        "Title": "Skonfigurowanie narzędzia do tworzenia wykresu Gantta",
+        "Status": "In progress",
+        "Start date": "2026-11-01",
+        "Target date": "2026-11-05"
+      },
+      "milestone": null,
+      "parent_issue": {
+        "number": 65,
+        "title": "Harmonogram realizacji dokumentacji projektowej",
+        "state": "OPEN",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65",
+        "repository": "Matthew-Calish/mWarsztat"
+      },
+      "sub_issues_summary": {
+        "total": 0,
+        "completed": 0,
+        "percent_completed": 0
+      },
+      "sub_issues": [],
+      "relationships": {
+        "tracked_in_issues": [],
+        "tracked_issues": [],
+        "linked_pull_requests": [],
+        "blocked_by": [],
+        "blocking": []
+      },
+      "body": ""
+    },
+    {
+      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7U3g",
+      "type": "Issue",
+      "is_archived": false,
+      "repository": "Matthew-Calish/mWarsztat",
+      "number": 16,
+      "title": "Stworzenie zadań (WBS)",
+      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/16",
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "issue_type": null,
+      "author": "kanvvu",
+      "created_at": "2026-10-31T03:45:34Z",
+      "updated_at": "2026-11-06T16:54:08Z",
+      "closed_at": "2026-11-06T16:54:08Z",
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
+      "labels": [
+        "plane"
+      ],
+      "project_fields": {
+        "Title": "Stworzenie zadań (WBS)",
+        "Status": "Done",
+        "Start date": "2026-10-24",
+        "Target date": "2026-10-30"
+      },
+      "milestone": null,
+      "parent_issue": {
+        "number": 65,
+        "title": "Harmonogram realizacji dokumentacji projektowej",
+        "state": "OPEN",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65",
+        "repository": "Matthew-Calish/mWarsztat"
+      },
+      "sub_issues_summary": {
+        "total": 0,
+        "completed": 0,
+        "percent_completed": 0
+      },
+      "sub_issues": [],
+      "relationships": {
+        "tracked_in_issues": [],
+        "tracked_issues": [],
+        "linked_pull_requests": [],
+        "blocked_by": [],
+        "blocking": []
+      },
+      "body": ""
+    },
+    {
+      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7T3I",
+      "type": "Issue",
+      "is_archived": false,
+      "repository": "Matthew-Calish/mWarsztat",
+      "number": 8,
+      "title": "Cel główny projektu",
+      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/8",
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "issue_type": null,
+      "author": "kanvvu",
+      "created_at": "2026-10-31T03:42:47Z",
+      "updated_at": "2026-11-06T16:53:40Z",
+      "closed_at": "2026-11-06T16:53:40Z",
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
+      "labels": [
+        "plane"
+      ],
+      "project_fields": {
+        "Title": "Cel główny projektu",
+        "Status": "Done",
+        "Start date": "2026-10-20",
+        "Target date": "2026-10-23"
+      },
+      "milestone": null,
+      "parent_issue": {
+        "number": 61,
+        "title": "Karta projektu",
+        "state": "CLOSED",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
+        "repository": "Matthew-Calish/mWarsztat"
+      },
+      "sub_issues_summary": {
+        "total": 0,
+        "completed": 0,
+        "percent_completed": 0
+      },
+      "sub_issues": [],
+      "relationships": {
+        "tracked_in_issues": [],
+        "tracked_issues": [],
+        "linked_pull_requests": [],
+        "blocked_by": [],
+        "blocking": []
+      },
+      "body": ""
+    },
+    {
+      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7UUc",
+      "type": "Issue",
+      "is_archived": false,
+      "repository": "Matthew-Calish/mWarsztat",
+      "number": 14,
+      "title": "Role w projekcie",
+      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/14",
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "issue_type": null,
+      "author": "kanvvu",
+      "created_at": "2026-10-31T03:44:01Z",
+      "updated_at": "2026-11-06T16:53:41Z",
+      "closed_at": "2026-11-06T16:53:41Z",
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
+      "labels": [
+        "plane"
+      ],
+      "project_fields": {
+        "Title": "Role w projekcie",
+        "Status": "Done",
+        "Target date": "2026-10-23",
+        "Start date": "2026-10-20"
+      },
+      "milestone": null,
+      "parent_issue": {
+        "number": 61,
+        "title": "Karta projektu",
+        "state": "CLOSED",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
+        "repository": "Matthew-Calish/mWarsztat"
+      },
+      "sub_issues_summary": {
+        "total": 0,
+        "completed": 0,
+        "percent_completed": 0
+      },
+      "sub_issues": [],
+      "relationships": {
+        "tracked_in_issues": [],
+        "tracked_issues": [],
+        "linked_pull_requests": [],
+        "blocked_by": [],
+        "blocking": []
+      },
+      "body": ""
+    },
+    {
+      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7Tpg",
+      "type": "Issue",
+      "is_archived": false,
+      "repository": "Matthew-Calish/mWarsztat",
+      "number": 5,
+      "title": "Informacje podstawowe projektu",
+      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/5",
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "issue_type": null,
+      "author": "kanvvu",
+      "created_at": "2026-10-31T03:42:15Z",
+      "updated_at": "2026-11-06T16:53:32Z",
+      "closed_at": "2026-11-06T16:53:31Z",
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
+      "labels": [
+        "plane"
+      ],
+      "project_fields": {
+        "Title": "Informacje podstawowe projektu",
+        "Status": "Done",
+        "Start date": "2026-10-16",
+        "Target date": "2026-10-20"
+      },
+      "milestone": null,
+      "parent_issue": {
+        "number": 61,
+        "title": "Karta projektu",
+        "state": "CLOSED",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
+        "repository": "Matthew-Calish/mWarsztat"
+      },
+      "sub_issues_summary": {
+        "total": 0,
+        "completed": 0,
+        "percent_completed": 0
+      },
+      "sub_issues": [],
+      "relationships": {
+        "tracked_in_issues": [],
+        "tracked_issues": [],
+        "linked_pull_requests": [],
+        "blocked_by": [],
+        "blocking": [
+          {
+            "number": 7,
+            "title": "Problem projektowy",
+            "state": "closed",
+            "url": "https://github.com/Matthew-Calish/mWarsztat/issues/7"
+          }
+        ]
+      },
+      "body": ""
+    },
+    {
+      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7Tto",
+      "type": "Issue",
+      "is_archived": false,
+      "repository": "Matthew-Calish/mWarsztat",
+      "number": 6,
+      "title": "Uzasadnienie projektu",
+      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/6",
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "issue_type": null,
+      "author": "kanvvu",
+      "created_at": "2026-10-31T03:42:25Z",
+      "updated_at": "2026-11-06T16:53:32Z",
+      "closed_at": "2026-11-06T16:53:32Z",
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
+      "labels": [
+        "plane"
+      ],
+      "project_fields": {
+        "Title": "Uzasadnienie projektu",
+        "Status": "Done",
+        "Start date": "2026-10-16",
+        "Target date": "2026-10-20"
+      },
+      "milestone": null,
+      "parent_issue": {
+        "number": 61,
+        "title": "Karta projektu",
+        "state": "CLOSED",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
+        "repository": "Matthew-Calish/mWarsztat"
+      },
+      "sub_issues_summary": {
+        "total": 0,
+        "completed": 0,
+        "percent_completed": 0
+      },
+      "sub_issues": [],
+      "relationships": {
+        "tracked_in_issues": [],
+        "tracked_issues": [],
+        "linked_pull_requests": [],
+        "blocked_by": [],
+        "blocking": []
+      },
+      "body": ""
+    },
+    {
+      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7TxQ",
+      "type": "Issue",
+      "is_archived": false,
+      "repository": "Matthew-Calish/mWarsztat",
+      "number": 7,
+      "title": "Problem projektowy",
+      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/7",
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "issue_type": null,
+      "author": "kanvvu",
+      "created_at": "2026-10-31T03:42:35Z",
+      "updated_at": "2026-11-06T16:53:33Z",
+      "closed_at": "2026-11-06T16:53:33Z",
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
+      "labels": [
+        "plane"
+      ],
+      "project_fields": {
+        "Title": "Problem projektowy",
+        "Status": "Done",
+        "Start date": "2026-10-16",
+        "Target date": "2026-10-20"
+      },
+      "milestone": null,
+      "parent_issue": {
+        "number": 61,
+        "title": "Karta projektu",
+        "state": "CLOSED",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
+        "repository": "Matthew-Calish/mWarsztat"
+      },
+      "sub_issues_summary": {
+        "total": 0,
+        "completed": 0,
+        "percent_completed": 0
+      },
+      "sub_issues": [],
+      "relationships": {
+        "tracked_in_issues": [],
+        "tracked_issues": [],
+        "linked_pull_requests": [],
+        "blocked_by": [
+          {
+            "number": 5,
+            "title": "Informacje podstawowe projektu",
+            "state": "closed",
+            "url": "https://github.com/Matthew-Calish/mWarsztat/issues/5"
+          }
+        ],
+        "blocking": []
+      },
+      "body": ""
+    },
+    {
+      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7UBU",
+      "type": "Issue",
+      "is_archived": false,
+      "repository": "Matthew-Calish/mWarsztat",
+      "number": 9,
+      "title": "Zakres funkcjonalny projektu",
+      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/9",
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "issue_type": null,
+      "author": "kanvvu",
+      "created_at": "2026-10-31T03:43:12Z",
+      "updated_at": "2026-11-06T16:53:34Z",
+      "closed_at": "2026-11-06T16:53:34Z",
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
+      "labels": [
+        "plane"
+      ],
+      "project_fields": {
+        "Title": "Zakres funkcjonalny projektu",
+        "Status": "Done",
+        "Start date": "2026-10-16",
+        "Target date": "2026-10-20"
+      },
+      "milestone": null,
+      "parent_issue": {
+        "number": 61,
+        "title": "Karta projektu",
+        "state": "CLOSED",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
+        "repository": "Matthew-Calish/mWarsztat"
+      },
+      "sub_issues_summary": {
+        "total": 0,
+        "completed": 0,
+        "percent_completed": 0
+      },
+      "sub_issues": [],
+      "relationships": {
+        "tracked_in_issues": [],
+        "tracked_issues": [],
+        "linked_pull_requests": [],
+        "blocked_by": [],
+        "blocking": []
+      },
+      "body": ""
+    },
+    {
+      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7UDw",
+      "type": "Issue",
+      "is_archived": false,
+      "repository": "Matthew-Calish/mWarsztat",
+      "number": 10,
+      "title": "Zakres niefunkcjonalny",
+      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/10",
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "issue_type": null,
+      "author": "kanvvu",
+      "created_at": "2026-10-31T03:43:21Z",
+      "updated_at": "2026-11-06T16:53:35Z",
+      "closed_at": "2026-11-06T16:53:35Z",
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
+      "labels": [
+        "plane"
+      ],
+      "project_fields": {
+        "Title": "Zakres niefunkcjonalny",
+        "Status": "Done",
+        "Start date": "2026-10-16",
+        "Target date": "2026-10-20"
+      },
+      "milestone": null,
+      "parent_issue": {
+        "number": 61,
+        "title": "Karta projektu",
+        "state": "CLOSED",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
+        "repository": "Matthew-Calish/mWarsztat"
+      },
+      "sub_issues_summary": {
+        "total": 0,
+        "completed": 0,
+        "percent_completed": 0
+      },
+      "sub_issues": [],
+      "relationships": {
+        "tracked_in_issues": [],
+        "tracked_issues": [],
+        "linked_pull_requests": [],
+        "blocked_by": [],
+        "blocking": []
+      },
+      "body": ""
+    },
+    {
+      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7UIQ",
+      "type": "Issue",
+      "is_archived": false,
+      "repository": "Matthew-Calish/mWarsztat",
+      "number": 11,
+      "title": "Zakres organizacyjny projektu",
+      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/11",
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "issue_type": null,
+      "author": "kanvvu",
+      "created_at": "2026-10-31T03:43:34Z",
+      "updated_at": "2026-11-06T16:53:37Z",
+      "closed_at": "2026-11-06T16:53:37Z",
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
+      "labels": [
+        "plane"
+      ],
+      "project_fields": {
+        "Title": "Zakres organizacyjny projektu",
+        "Status": "Done",
+        "Start date": "2026-10-16",
+        "Target date": "2026-10-20"
+      },
+      "milestone": null,
+      "parent_issue": {
+        "number": 61,
+        "title": "Karta projektu",
+        "state": "CLOSED",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
+        "repository": "Matthew-Calish/mWarsztat"
+      },
+      "sub_issues_summary": {
+        "total": 0,
+        "completed": 0,
+        "percent_completed": 0
+      },
+      "sub_issues": [],
+      "relationships": {
+        "tracked_in_issues": [],
+        "tracked_issues": [],
+        "linked_pull_requests": [],
+        "blocked_by": [],
+        "blocking": []
+      },
+      "body": ""
+    },
+    {
+      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7UMo",
+      "type": "Issue",
+      "is_archived": false,
+      "repository": "Matthew-Calish/mWarsztat",
+      "number": 12,
+      "title": "Produkty projektu",
+      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/12",
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "issue_type": null,
+      "author": "kanvvu",
+      "created_at": "2026-10-31T03:43:43Z",
+      "updated_at": "2026-11-06T16:53:37Z",
+      "closed_at": "2026-11-06T16:53:37Z",
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
+      "labels": [
+        "plane"
+      ],
+      "project_fields": {
+        "Title": "Produkty projektu",
+        "Status": "Done",
+        "Start date": "2026-10-16",
+        "Target date": "2026-10-20"
+      },
+      "milestone": null,
+      "parent_issue": {
+        "number": 61,
+        "title": "Karta projektu",
+        "state": "CLOSED",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
+        "repository": "Matthew-Calish/mWarsztat"
+      },
+      "sub_issues_summary": {
+        "total": 0,
+        "completed": 0,
+        "percent_completed": 0
+      },
+      "sub_issues": [],
+      "relationships": {
+        "tracked_in_issues": [],
+        "tracked_issues": [],
+        "linked_pull_requests": [],
+        "blocked_by": [],
+        "blocking": []
+      },
+      "body": ""
+    },
+    {
+      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7URc",
+      "type": "Issue",
+      "is_archived": false,
+      "repository": "Matthew-Calish/mWarsztat",
+      "number": 13,
+      "title": "Kryteria sukcesu",
+      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/13",
+      "state": "CLOSED",
+      "state_reason": "COMPLETED",
+      "issue_type": null,
+      "author": "kanvvu",
+      "created_at": "2026-10-31T03:43:53Z",
+      "updated_at": "2026-11-06T16:53:40Z",
+      "closed_at": "2026-11-06T16:53:40Z",
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
+      "labels": [
+        "plane"
+      ],
+      "project_fields": {
+        "Title": "Kryteria sukcesu",
+        "Status": "Done",
+        "Start date": "2026-10-16",
+        "Target date": "2026-10-20"
+      },
+      "milestone": null,
+      "parent_issue": {
+        "number": 61,
+        "title": "Karta projektu",
+        "state": "CLOSED",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
+        "repository": "Matthew-Calish/mWarsztat"
+      },
+      "sub_issues_summary": {
+        "total": 0,
+        "completed": 0,
+        "percent_completed": 0
+      },
+      "sub_issues": [],
+      "relationships": {
+        "tracked_in_issues": [],
+        "tracked_issues": [],
+        "linked_pull_requests": [],
+        "blocked_by": [],
+        "blocking": []
+      },
+      "body": ""
+    },
+    {
       "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE0I7k",
       "type": "Issue",
       "is_archived": false,
@@ -115,9 +1040,13 @@
       "issue_type": null,
       "author": "Matthew-Calish",
       "created_at": "2026-10-30T15:59:07Z",
-      "updated_at": "2026-11-06T14:51:38Z",
+      "updated_at": "2026-11-06T17:23:24Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -136,14 +1065,14 @@
       "parent_issue": null,
       "sub_issues_summary": {
         "total": 4,
-        "completed": 0,
-        "percent_completed": 0
+        "completed": 1,
+        "percent_completed": 25
       },
       "sub_issues": [
         {
           "number": 61,
           "title": "Karta projektu",
-          "state": "OPEN",
+          "state": "CLOSED",
           "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
           "repository": "Matthew-Calish/mWarsztat"
         },
@@ -191,9 +1120,13 @@
       "issue_type": null,
       "author": "Matthew-Calish",
       "created_at": "2026-10-30T15:59:14Z",
-      "updated_at": "2026-11-06T14:55:26Z",
+      "updated_at": "2026-11-06T17:23:35Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -267,9 +1200,11 @@
       "issue_type": null,
       "author": "Matthew-Calish",
       "created_at": "2026-10-30T15:59:20Z",
-      "updated_at": "2026-11-06T14:54:04Z",
+      "updated_at": "2026-11-06T17:24:19Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "mesniezek"
+      ],
       "labels": [
         "plane"
       ],
@@ -324,627 +1259,6 @@
       "body": ""
     },
     {
-      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7Tpg",
-      "type": "Issue",
-      "is_archived": false,
-      "repository": "Matthew-Calish/mWarsztat",
-      "number": 5,
-      "title": "Informacje podstawowe projektu",
-      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/5",
-      "state": "OPEN",
-      "state_reason": null,
-      "issue_type": null,
-      "author": "kanvvu",
-      "created_at": "2026-10-31T03:42:15Z",
-      "updated_at": "2026-11-05T18:50:00Z",
-      "closed_at": null,
-      "assignees": [
-        "kanvvu",
-        "Matthew-Calish"
-      ],
-      "labels": [
-        "plane"
-      ],
-      "project_fields": {
-        "Title": "Informacje podstawowe projektu",
-        "Status": "Backlog",
-        "Start date": "2026-11-05",
-        "Target date": "2026-11-16"
-      },
-      "milestone": null,
-      "parent_issue": {
-        "number": 61,
-        "title": "Karta projektu",
-        "state": "OPEN",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
-        "repository": "Matthew-Calish/mWarsztat"
-      },
-      "sub_issues_summary": {
-        "total": 0,
-        "completed": 0,
-        "percent_completed": 0
-      },
-      "sub_issues": [],
-      "relationships": {
-        "tracked_in_issues": [],
-        "tracked_issues": [],
-        "linked_pull_requests": [],
-        "blocked_by": [],
-        "blocking": [
-          {
-            "number": 7,
-            "title": "Problem projektowy",
-            "state": "open",
-            "url": "https://github.com/Matthew-Calish/mWarsztat/issues/7"
-          }
-        ]
-      },
-      "body": ""
-    },
-    {
-      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7Tto",
-      "type": "Issue",
-      "is_archived": false,
-      "repository": "Matthew-Calish/mWarsztat",
-      "number": 6,
-      "title": "Uzasadnienie projektu",
-      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/6",
-      "state": "OPEN",
-      "state_reason": null,
-      "issue_type": null,
-      "author": "kanvvu",
-      "created_at": "2026-10-31T03:42:25Z",
-      "updated_at": "2026-11-05T18:50:48Z",
-      "closed_at": null,
-      "assignees": [],
-      "labels": [
-        "plane"
-      ],
-      "project_fields": {
-        "Title": "Uzasadnienie projektu",
-        "Status": "Backlog",
-        "Start date": "2026-12-09",
-        "Target date": "2026-12-16"
-      },
-      "milestone": null,
-      "parent_issue": {
-        "number": 61,
-        "title": "Karta projektu",
-        "state": "OPEN",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
-        "repository": "Matthew-Calish/mWarsztat"
-      },
-      "sub_issues_summary": {
-        "total": 0,
-        "completed": 0,
-        "percent_completed": 0
-      },
-      "sub_issues": [],
-      "relationships": {
-        "tracked_in_issues": [],
-        "tracked_issues": [],
-        "linked_pull_requests": [],
-        "blocked_by": [],
-        "blocking": []
-      },
-      "body": ""
-    },
-    {
-      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7TxQ",
-      "type": "Issue",
-      "is_archived": false,
-      "repository": "Matthew-Calish/mWarsztat",
-      "number": 7,
-      "title": "Problem projektowy",
-      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/7",
-      "state": "OPEN",
-      "state_reason": null,
-      "issue_type": null,
-      "author": "kanvvu",
-      "created_at": "2026-10-31T03:42:35Z",
-      "updated_at": "2026-11-05T18:49:37Z",
-      "closed_at": null,
-      "assignees": [],
-      "labels": [
-        "plane"
-      ],
-      "project_fields": {
-        "Title": "Problem projektowy",
-        "Status": "Backlog",
-        "Start date": "2026-11-17",
-        "Target date": "2026-11-17"
-      },
-      "milestone": null,
-      "parent_issue": {
-        "number": 61,
-        "title": "Karta projektu",
-        "state": "OPEN",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
-        "repository": "Matthew-Calish/mWarsztat"
-      },
-      "sub_issues_summary": {
-        "total": 0,
-        "completed": 0,
-        "percent_completed": 0
-      },
-      "sub_issues": [],
-      "relationships": {
-        "tracked_in_issues": [],
-        "tracked_issues": [],
-        "linked_pull_requests": [],
-        "blocked_by": [
-          {
-            "number": 5,
-            "title": "Informacje podstawowe projektu",
-            "state": "open",
-            "url": "https://github.com/Matthew-Calish/mWarsztat/issues/5"
-          }
-        ],
-        "blocking": []
-      },
-      "body": ""
-    },
-    {
-      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7T3I",
-      "type": "Issue",
-      "is_archived": false,
-      "repository": "Matthew-Calish/mWarsztat",
-      "number": 8,
-      "title": "Cel główny projektu",
-      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/8",
-      "state": "OPEN",
-      "state_reason": null,
-      "issue_type": null,
-      "author": "kanvvu",
-      "created_at": "2026-10-31T03:42:47Z",
-      "updated_at": "2026-11-05T17:34:51Z",
-      "closed_at": null,
-      "assignees": [],
-      "labels": [
-        "plane"
-      ],
-      "project_fields": {
-        "Title": "Cel główny projektu",
-        "Status": "Backlog"
-      },
-      "milestone": null,
-      "parent_issue": {
-        "number": 61,
-        "title": "Karta projektu",
-        "state": "OPEN",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
-        "repository": "Matthew-Calish/mWarsztat"
-      },
-      "sub_issues_summary": {
-        "total": 0,
-        "completed": 0,
-        "percent_completed": 0
-      },
-      "sub_issues": [],
-      "relationships": {
-        "tracked_in_issues": [],
-        "tracked_issues": [],
-        "linked_pull_requests": [],
-        "blocked_by": [],
-        "blocking": []
-      },
-      "body": ""
-    },
-    {
-      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7UBU",
-      "type": "Issue",
-      "is_archived": false,
-      "repository": "Matthew-Calish/mWarsztat",
-      "number": 9,
-      "title": "Zakres funkcjonalny projektu",
-      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/9",
-      "state": "OPEN",
-      "state_reason": null,
-      "issue_type": null,
-      "author": "kanvvu",
-      "created_at": "2026-10-31T03:43:12Z",
-      "updated_at": "2026-11-05T17:29:54Z",
-      "closed_at": null,
-      "assignees": [],
-      "labels": [
-        "plane"
-      ],
-      "project_fields": {
-        "Title": "Zakres funkcjonalny projektu",
-        "Status": "Backlog"
-      },
-      "milestone": null,
-      "parent_issue": {
-        "number": 61,
-        "title": "Karta projektu",
-        "state": "OPEN",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
-        "repository": "Matthew-Calish/mWarsztat"
-      },
-      "sub_issues_summary": {
-        "total": 0,
-        "completed": 0,
-        "percent_completed": 0
-      },
-      "sub_issues": [],
-      "relationships": {
-        "tracked_in_issues": [],
-        "tracked_issues": [],
-        "linked_pull_requests": [],
-        "blocked_by": [],
-        "blocking": []
-      },
-      "body": ""
-    },
-    {
-      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7UDw",
-      "type": "Issue",
-      "is_archived": false,
-      "repository": "Matthew-Calish/mWarsztat",
-      "number": 10,
-      "title": "Zakres niefunkcjonalny",
-      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/10",
-      "state": "OPEN",
-      "state_reason": null,
-      "issue_type": null,
-      "author": "kanvvu",
-      "created_at": "2026-10-31T03:43:21Z",
-      "updated_at": "2026-11-05T17:31:05Z",
-      "closed_at": null,
-      "assignees": [],
-      "labels": [
-        "plane"
-      ],
-      "project_fields": {
-        "Title": "Zakres niefunkcjonalny",
-        "Status": "Backlog"
-      },
-      "milestone": null,
-      "parent_issue": {
-        "number": 61,
-        "title": "Karta projektu",
-        "state": "OPEN",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
-        "repository": "Matthew-Calish/mWarsztat"
-      },
-      "sub_issues_summary": {
-        "total": 0,
-        "completed": 0,
-        "percent_completed": 0
-      },
-      "sub_issues": [],
-      "relationships": {
-        "tracked_in_issues": [],
-        "tracked_issues": [],
-        "linked_pull_requests": [],
-        "blocked_by": [],
-        "blocking": []
-      },
-      "body": ""
-    },
-    {
-      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7UIQ",
-      "type": "Issue",
-      "is_archived": false,
-      "repository": "Matthew-Calish/mWarsztat",
-      "number": 11,
-      "title": "Zakres organizacyjny projektu",
-      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/11",
-      "state": "OPEN",
-      "state_reason": null,
-      "issue_type": null,
-      "author": "kanvvu",
-      "created_at": "2026-10-31T03:43:34Z",
-      "updated_at": "2026-11-05T17:30:45Z",
-      "closed_at": null,
-      "assignees": [],
-      "labels": [
-        "plane"
-      ],
-      "project_fields": {
-        "Title": "Zakres organizacyjny projektu",
-        "Status": "Backlog"
-      },
-      "milestone": null,
-      "parent_issue": {
-        "number": 61,
-        "title": "Karta projektu",
-        "state": "OPEN",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
-        "repository": "Matthew-Calish/mWarsztat"
-      },
-      "sub_issues_summary": {
-        "total": 0,
-        "completed": 0,
-        "percent_completed": 0
-      },
-      "sub_issues": [],
-      "relationships": {
-        "tracked_in_issues": [],
-        "tracked_issues": [],
-        "linked_pull_requests": [],
-        "blocked_by": [],
-        "blocking": []
-      },
-      "body": ""
-    },
-    {
-      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7UMo",
-      "type": "Issue",
-      "is_archived": false,
-      "repository": "Matthew-Calish/mWarsztat",
-      "number": 12,
-      "title": "Produkty projektu",
-      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/12",
-      "state": "OPEN",
-      "state_reason": null,
-      "issue_type": null,
-      "author": "kanvvu",
-      "created_at": "2026-10-31T03:43:43Z",
-      "updated_at": "2026-11-05T17:30:15Z",
-      "closed_at": null,
-      "assignees": [],
-      "labels": [
-        "plane"
-      ],
-      "project_fields": {
-        "Title": "Produkty projektu",
-        "Status": "Backlog"
-      },
-      "milestone": null,
-      "parent_issue": {
-        "number": 61,
-        "title": "Karta projektu",
-        "state": "OPEN",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
-        "repository": "Matthew-Calish/mWarsztat"
-      },
-      "sub_issues_summary": {
-        "total": 0,
-        "completed": 0,
-        "percent_completed": 0
-      },
-      "sub_issues": [],
-      "relationships": {
-        "tracked_in_issues": [],
-        "tracked_issues": [],
-        "linked_pull_requests": [],
-        "blocked_by": [],
-        "blocking": []
-      },
-      "body": ""
-    },
-    {
-      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7URc",
-      "type": "Issue",
-      "is_archived": false,
-      "repository": "Matthew-Calish/mWarsztat",
-      "number": 13,
-      "title": "Kryteria sukcesu",
-      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/13",
-      "state": "OPEN",
-      "state_reason": null,
-      "issue_type": null,
-      "author": "kanvvu",
-      "created_at": "2026-10-31T03:43:53Z",
-      "updated_at": "2026-11-05T17:30:38Z",
-      "closed_at": null,
-      "assignees": [],
-      "labels": [
-        "plane"
-      ],
-      "project_fields": {
-        "Title": "Kryteria sukcesu",
-        "Status": "Backlog"
-      },
-      "milestone": null,
-      "parent_issue": {
-        "number": 61,
-        "title": "Karta projektu",
-        "state": "OPEN",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
-        "repository": "Matthew-Calish/mWarsztat"
-      },
-      "sub_issues_summary": {
-        "total": 0,
-        "completed": 0,
-        "percent_completed": 0
-      },
-      "sub_issues": [],
-      "relationships": {
-        "tracked_in_issues": [],
-        "tracked_issues": [],
-        "linked_pull_requests": [],
-        "blocked_by": [],
-        "blocking": []
-      },
-      "body": ""
-    },
-    {
-      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7UUc",
-      "type": "Issue",
-      "is_archived": false,
-      "repository": "Matthew-Calish/mWarsztat",
-      "number": 14,
-      "title": "Role w projekcie",
-      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/14",
-      "state": "OPEN",
-      "state_reason": null,
-      "issue_type": null,
-      "author": "kanvvu",
-      "created_at": "2026-10-31T03:44:01Z",
-      "updated_at": "2026-11-05T17:30:47Z",
-      "closed_at": null,
-      "assignees": [],
-      "labels": [
-        "plane"
-      ],
-      "project_fields": {
-        "Title": "Role w projekcie",
-        "Status": "Backlog"
-      },
-      "milestone": null,
-      "parent_issue": {
-        "number": 61,
-        "title": "Karta projektu",
-        "state": "OPEN",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
-        "repository": "Matthew-Calish/mWarsztat"
-      },
-      "sub_issues_summary": {
-        "total": 0,
-        "completed": 0,
-        "percent_completed": 0
-      },
-      "sub_issues": [],
-      "relationships": {
-        "tracked_in_issues": [],
-        "tracked_issues": [],
-        "linked_pull_requests": [],
-        "blocked_by": [],
-        "blocking": []
-      },
-      "body": ""
-    },
-    {
-      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7Uyo",
-      "type": "Issue",
-      "is_archived": false,
-      "repository": "Matthew-Calish/mWarsztat",
-      "number": 15,
-      "title": "WBS - etapy",
-      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/15",
-      "state": "OPEN",
-      "state_reason": null,
-      "issue_type": null,
-      "author": "kanvvu",
-      "created_at": "2026-10-31T03:45:21Z",
-      "updated_at": "2026-11-05T17:30:48Z",
-      "closed_at": null,
-      "assignees": [],
-      "labels": [
-        "plane"
-      ],
-      "project_fields": {
-        "Title": "WBS - etapy",
-        "Status": "Backlog"
-      },
-      "milestone": null,
-      "parent_issue": {
-        "number": 65,
-        "title": "Harmonogram realizacji dokumentacji projektowej",
-        "state": "OPEN",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65",
-        "repository": "Matthew-Calish/mWarsztat"
-      },
-      "sub_issues_summary": {
-        "total": 0,
-        "completed": 0,
-        "percent_completed": 0
-      },
-      "sub_issues": [],
-      "relationships": {
-        "tracked_in_issues": [],
-        "tracked_issues": [],
-        "linked_pull_requests": [],
-        "blocked_by": [],
-        "blocking": []
-      },
-      "body": ""
-    },
-    {
-      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7U3g",
-      "type": "Issue",
-      "is_archived": false,
-      "repository": "Matthew-Calish/mWarsztat",
-      "number": 16,
-      "title": "WBS - zadania",
-      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/16",
-      "state": "OPEN",
-      "state_reason": null,
-      "issue_type": null,
-      "author": "kanvvu",
-      "created_at": "2026-10-31T03:45:34Z",
-      "updated_at": "2026-11-05T17:30:19Z",
-      "closed_at": null,
-      "assignees": [],
-      "labels": [
-        "plane"
-      ],
-      "project_fields": {
-        "Title": "WBS - zadania",
-        "Status": "Backlog"
-      },
-      "milestone": null,
-      "parent_issue": {
-        "number": 65,
-        "title": "Harmonogram realizacji dokumentacji projektowej",
-        "state": "OPEN",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65",
-        "repository": "Matthew-Calish/mWarsztat"
-      },
-      "sub_issues_summary": {
-        "total": 0,
-        "completed": 0,
-        "percent_completed": 0
-      },
-      "sub_issues": [],
-      "relationships": {
-        "tracked_in_issues": [],
-        "tracked_issues": [],
-        "linked_pull_requests": [],
-        "blocked_by": [],
-        "blocking": []
-      },
-      "body": ""
-    },
-    {
-      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7U6c",
-      "type": "Issue",
-      "is_archived": false,
-      "repository": "Matthew-Calish/mWarsztat",
-      "number": 17,
-      "title": "Diagram Gantta",
-      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/17",
-      "state": "OPEN",
-      "state_reason": null,
-      "issue_type": null,
-      "author": "kanvvu",
-      "created_at": "2026-10-31T03:45:41Z",
-      "updated_at": "2026-11-05T17:31:42Z",
-      "closed_at": null,
-      "assignees": [],
-      "labels": [
-        "plane"
-      ],
-      "project_fields": {
-        "Title": "Diagram Gantta",
-        "Status": "Backlog"
-      },
-      "milestone": null,
-      "parent_issue": {
-        "number": 65,
-        "title": "Harmonogram realizacji dokumentacji projektowej",
-        "state": "OPEN",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65",
-        "repository": "Matthew-Calish/mWarsztat"
-      },
-      "sub_issues_summary": {
-        "total": 0,
-        "completed": 0,
-        "percent_completed": 0
-      },
-      "sub_issues": [],
-      "relationships": {
-        "tracked_in_issues": [],
-        "tracked_issues": [],
-        "linked_pull_requests": [],
-        "blocked_by": [],
-        "blocking": []
-      },
-      "body": ""
-    },
-    {
       "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7U-I",
       "type": "Issue",
       "is_archived": false,
@@ -957,9 +1271,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:45:53Z",
-      "updated_at": "2026-11-05T17:30:27Z",
+      "updated_at": "2026-11-06T17:24:38Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -1005,9 +1323,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:46:41Z",
-      "updated_at": "2026-11-05T17:32:23Z",
+      "updated_at": "2026-11-06T16:43:17Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -1051,9 +1373,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:51:31Z",
-      "updated_at": "2026-11-05T17:32:18Z",
+      "updated_at": "2026-11-06T16:43:26Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -1097,9 +1423,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:51:47Z",
-      "updated_at": "2026-11-05T17:31:55Z",
+      "updated_at": "2026-11-06T16:43:37Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -1143,9 +1473,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:52:21Z",
-      "updated_at": "2026-11-05T17:32:29Z",
+      "updated_at": "2026-11-06T16:43:52Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -1189,9 +1523,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:52:33Z",
-      "updated_at": "2026-11-05T17:32:31Z",
+      "updated_at": "2026-11-06T16:44:14Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -1235,9 +1573,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:52:45Z",
-      "updated_at": "2026-11-05T17:32:54Z",
+      "updated_at": "2026-11-06T16:44:23Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -1281,9 +1623,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:52:58Z",
-      "updated_at": "2026-11-05T17:30:44Z",
+      "updated_at": "2026-11-06T17:25:05Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -1327,9 +1673,12 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:53:31Z",
-      "updated_at": "2026-11-05T17:31:56Z",
+      "updated_at": "2026-11-06T16:45:55Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -1373,9 +1722,11 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:53:52Z",
-      "updated_at": "2026-11-05T17:31:22Z",
+      "updated_at": "2026-11-06T16:57:19Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "mesniezek"
+      ],
       "labels": [
         "plane"
       ],
@@ -1419,9 +1770,11 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:54:06Z",
-      "updated_at": "2026-11-05T17:31:40Z",
+      "updated_at": "2026-11-06T16:57:25Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "mesniezek"
+      ],
       "labels": [
         "plane"
       ],
@@ -1465,9 +1818,11 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:54:15Z",
-      "updated_at": "2026-11-05T17:32:09Z",
+      "updated_at": "2026-11-06T16:57:35Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "mesniezek"
+      ],
       "labels": [
         "plane"
       ],
@@ -1511,9 +1866,11 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:54:23Z",
-      "updated_at": "2026-11-05T17:31:13Z",
+      "updated_at": "2026-11-06T16:57:56Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "mesniezek"
+      ],
       "labels": [
         "plane"
       ],
@@ -1557,9 +1914,11 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:54:30Z",
-      "updated_at": "2026-11-05T17:31:01Z",
+      "updated_at": "2026-11-06T16:58:03Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "mesniezek"
+      ],
       "labels": [
         "plane"
       ],
@@ -1603,9 +1962,11 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:54:50Z",
-      "updated_at": "2026-11-05T17:32:07Z",
+      "updated_at": "2026-11-06T16:58:52Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu"
+      ],
       "labels": [
         "plane"
       ],
@@ -1649,9 +2010,11 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:55:05Z",
-      "updated_at": "2026-11-05T17:32:20Z",
+      "updated_at": "2026-11-06T16:58:57Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu"
+      ],
       "labels": [
         "plane"
       ],
@@ -1695,9 +2058,11 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T03:55:50Z",
-      "updated_at": "2026-11-05T17:25:51Z",
+      "updated_at": "2026-11-06T16:59:02Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu"
+      ],
       "labels": [
         "plane"
       ],
@@ -1741,9 +2106,11 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:38:51Z",
-      "updated_at": "2026-11-05T17:25:37Z",
+      "updated_at": "2026-11-06T17:01:16Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -1787,9 +2154,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:38:58Z",
-      "updated_at": "2026-11-05T17:25:33Z",
+      "updated_at": "2026-11-06T17:01:20Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -1833,7 +2204,7 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:39:08Z",
-      "updated_at": "2026-11-05T17:25:19Z",
+      "updated_at": "2026-11-06T17:02:28Z",
       "closed_at": null,
       "assignees": [],
       "labels": [
@@ -1879,7 +2250,7 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:39:16Z",
-      "updated_at": "2026-11-05T17:25:22Z",
+      "updated_at": "2026-11-06T17:02:20Z",
       "closed_at": null,
       "assignees": [],
       "labels": [
@@ -2063,15 +2434,19 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:39:59Z",
-      "updated_at": "2026-11-05T17:25:58Z",
+      "updated_at": "2026-11-06T17:24:01Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "mesniezek"
+      ],
       "labels": [
         "plane"
       ],
       "project_fields": {
         "Title": "Architekura logiczna systemu",
-        "Status": "Backlog"
+        "Status": "Backlog",
+        "Start date": "2026-12-15",
+        "Target date": "2026-12-22"
       },
       "milestone": null,
       "parent_issue": {
@@ -2109,15 +2484,19 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:40:11Z",
-      "updated_at": "2026-11-05T17:25:41Z",
+      "updated_at": "2026-11-06T17:24:07Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "mesniezek"
+      ],
       "labels": [
         "plane"
       ],
       "project_fields": {
         "Title": "Moduły systemu",
-        "Status": "Backlog"
+        "Status": "Backlog",
+        "Start date": "2026-12-27",
+        "Target date": "2026-12-31"
       },
       "milestone": null,
       "parent_issue": {
@@ -2155,15 +2534,19 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:40:18Z",
-      "updated_at": "2026-11-05T17:26:03Z",
+      "updated_at": "2026-11-06T17:24:12Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "mesniezek"
+      ],
       "labels": [
         "plane"
       ],
       "project_fields": {
         "Title": "Technologie systemu",
-        "Status": "Backlog"
+        "Status": "Backlog",
+        "Target date": "2027-01-04",
+        "Start date": "2027-01-01"
       },
       "milestone": null,
       "parent_issue": {
@@ -2201,15 +2584,19 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:41:57Z",
-      "updated_at": "2026-11-05T17:26:29Z",
+      "updated_at": "2026-11-06T17:19:35Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu"
+      ],
       "labels": [
         "plane"
       ],
       "project_fields": {
         "Title": "Architektura kolekcji i dokumentów",
-        "Status": "Backlog"
+        "Status": "Backlog",
+        "Start date": "2026-12-17",
+        "Target date": "2026-12-22"
       },
       "milestone": null,
       "parent_issue": {
@@ -2247,17 +2634,19 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:42:12Z",
-      "updated_at": "2026-11-05T17:26:29Z",
+      "updated_at": "2026-11-06T17:19:44Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu"
+      ],
       "labels": [
         "plane"
       ],
       "project_fields": {
         "Title": "Diagram hierarchii kolekcji",
         "Status": "Backlog",
-        "Start date": "2026-11-06",
-        "Target date": "2026-11-06"
+        "Start date": "2026-12-26",
+        "Target date": "2026-12-29"
       },
       "milestone": null,
       "parent_issue": {
@@ -2295,17 +2684,19 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:42:21Z",
-      "updated_at": "2026-11-05T17:25:26Z",
+      "updated_at": "2026-11-06T17:19:40Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu"
+      ],
       "labels": [
         "plane"
       ],
       "project_fields": {
         "Title": "Opis powiązań danych",
         "Status": "Backlog",
-        "Start date": "2026-10-29",
-        "Target date": "2026-10-29"
+        "Start date": "2026-12-26",
+        "Target date": "2026-12-28"
       },
       "milestone": null,
       "parent_issue": {
@@ -2343,15 +2734,19 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:42:29Z",
-      "updated_at": "2026-11-05T17:26:14Z",
+      "updated_at": "2026-11-06T17:19:48Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu"
+      ],
       "labels": [
         "plane"
       ],
       "project_fields": {
         "Title": "Struktura dokumentów i typy danych Firestore",
-        "Status": "Backlog"
+        "Status": "Backlog",
+        "Start date": "2027-01-01",
+        "Target date": "2027-01-04"
       },
       "milestone": null,
       "parent_issue": {
@@ -2389,15 +2784,19 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:42:39Z",
-      "updated_at": "2026-11-05T17:27:23Z",
+      "updated_at": "2026-11-06T17:19:51Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu"
+      ],
       "labels": [
         "plane"
       ],
       "project_fields": {
         "Title": "Reguły bezpieczeństwa i spójność",
-        "Status": "Backlog"
+        "Status": "Backlog",
+        "Target date": "2027-01-04",
+        "Start date": "2026-12-30"
       },
       "milestone": null,
       "parent_issue": {
@@ -2828,9 +3227,11 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:47:05Z",
-      "updated_at": "2026-11-05T17:26:35Z",
+      "updated_at": "2026-11-06T17:19:56Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -2874,9 +3275,11 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:47:16Z",
-      "updated_at": "2026-11-05T17:26:29Z",
+      "updated_at": "2026-11-06T17:19:58Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -2920,9 +3323,11 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:47:24Z",
-      "updated_at": "2026-11-05T17:25:41Z",
+      "updated_at": "2026-11-06T17:20:01Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -2966,9 +3371,11 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:47:34Z",
-      "updated_at": "2026-11-05T17:25:51Z",
+      "updated_at": "2026-11-06T17:20:05Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -3012,9 +3419,11 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:47:41Z",
-      "updated_at": "2026-11-05T17:27:43Z",
+      "updated_at": "2026-11-06T17:20:07Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -3058,9 +3467,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:47:57Z",
-      "updated_at": "2026-11-05T17:27:30Z",
+      "updated_at": "2026-11-06T17:20:31Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -3104,9 +3517,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:48:10Z",
-      "updated_at": "2026-11-05T17:26:29Z",
+      "updated_at": "2026-11-06T17:20:40Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -3150,9 +3567,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:48:20Z",
-      "updated_at": "2026-11-05T17:26:04Z",
+      "updated_at": "2026-11-06T17:20:49Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -3196,9 +3617,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T04:48:32Z",
-      "updated_at": "2026-11-05T17:26:16Z",
+      "updated_at": "2026-11-06T17:20:55Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -3242,9 +3667,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T05:34:36Z",
-      "updated_at": "2026-11-05T17:23:50Z",
+      "updated_at": "2026-11-06T17:21:32Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -3288,9 +3717,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T05:34:58Z",
-      "updated_at": "2026-11-05T17:22:09Z",
+      "updated_at": "2026-11-06T17:21:36Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -3322,238 +3755,6 @@
       "body": ""
     },
     {
-      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhE7t5s",
-      "type": "Issue",
-      "is_archived": false,
-      "repository": "Matthew-Calish/mWarsztat",
-      "number": 61,
-      "title": "Karta projektu",
-      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61",
-      "state": "OPEN",
-      "state_reason": null,
-      "issue_type": null,
-      "author": "kanvvu",
-      "created_at": "2026-10-31T04:55:23Z",
-      "updated_at": "2026-11-06T14:54:45Z",
-      "closed_at": null,
-      "assignees": [
-        "kanvvu",
-        "mesniezek",
-        "Matthew-Calish"
-      ],
-      "labels": [
-        "plane"
-      ],
-      "project_fields": {
-        "Status": "Backlog",
-        "Title": "Karta projektu",
-        "Start date": "2026-10-16",
-        "Target date": "2026-10-23"
-      },
-      "milestone": {
-        "number": 1,
-        "title": "Określenie ram projektowych",
-        "state": "OPEN",
-        "due_on": "2026-11-30T00:00:00Z",
-        "description": "",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/milestone/1"
-      },
-      "parent_issue": {
-        "number": 1,
-        "title": "Etap 1",
-        "state": "OPEN",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/1",
-        "repository": "Matthew-Calish/mWarsztat"
-      },
-      "sub_issues_summary": {
-        "total": 10,
-        "completed": 0,
-        "percent_completed": 0
-      },
-      "sub_issues": [
-        {
-          "number": 5,
-          "title": "Informacje podstawowe projektu",
-          "state": "OPEN",
-          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/5",
-          "repository": "Matthew-Calish/mWarsztat"
-        },
-        {
-          "number": 6,
-          "title": "Uzasadnienie projektu",
-          "state": "OPEN",
-          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/6",
-          "repository": "Matthew-Calish/mWarsztat"
-        },
-        {
-          "number": 7,
-          "title": "Problem projektowy",
-          "state": "OPEN",
-          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/7",
-          "repository": "Matthew-Calish/mWarsztat"
-        },
-        {
-          "number": 8,
-          "title": "Cel główny projektu",
-          "state": "OPEN",
-          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/8",
-          "repository": "Matthew-Calish/mWarsztat"
-        },
-        {
-          "number": 9,
-          "title": "Zakres funkcjonalny projektu",
-          "state": "OPEN",
-          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/9",
-          "repository": "Matthew-Calish/mWarsztat"
-        },
-        {
-          "number": 10,
-          "title": "Zakres niefunkcjonalny",
-          "state": "OPEN",
-          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/10",
-          "repository": "Matthew-Calish/mWarsztat"
-        },
-        {
-          "number": 11,
-          "title": "Zakres organizacyjny projektu",
-          "state": "OPEN",
-          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/11",
-          "repository": "Matthew-Calish/mWarsztat"
-        },
-        {
-          "number": 12,
-          "title": "Produkty projektu",
-          "state": "OPEN",
-          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/12",
-          "repository": "Matthew-Calish/mWarsztat"
-        },
-        {
-          "number": 13,
-          "title": "Kryteria sukcesu",
-          "state": "OPEN",
-          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/13",
-          "repository": "Matthew-Calish/mWarsztat"
-        },
-        {
-          "number": 14,
-          "title": "Role w projekcie",
-          "state": "OPEN",
-          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/14",
-          "repository": "Matthew-Calish/mWarsztat"
-        }
-      ],
-      "relationships": {
-        "tracked_in_issues": [],
-        "tracked_issues": [],
-        "linked_pull_requests": [],
-        "blocked_by": [],
-        "blocking": [
-          {
-            "number": 65,
-            "title": "Harmonogram realizacji dokumentacji projektowej",
-            "state": "open",
-            "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65"
-          }
-        ]
-      },
-      "body": ""
-    },
-    {
-      "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFZSOA",
-      "type": "Issue",
-      "is_archived": false,
-      "repository": "Matthew-Calish/mWarsztat",
-      "number": 65,
-      "title": "Harmonogram realizacji dokumentacji projektowej",
-      "url": "https://github.com/Matthew-Calish/mWarsztat/issues/65",
-      "state": "OPEN",
-      "state_reason": null,
-      "issue_type": null,
-      "author": "Matthew-Calish",
-      "created_at": "2026-11-02T13:12:56Z",
-      "updated_at": "2026-11-06T15:33:49Z",
-      "closed_at": null,
-      "assignees": [
-        "kanvvu",
-        "mesniezek",
-        "Matthew-Calish"
-      ],
-      "labels": [
-        "plane"
-      ],
-      "project_fields": {
-        "Title": "Harmonogram realizacji dokumentacji projektowej",
-        "Status": "Backlog",
-        "Start date": "2026-10-24",
-        "Target date": "2026-11-17"
-      },
-      "milestone": null,
-      "parent_issue": {
-        "number": 1,
-        "title": "Etap 1",
-        "state": "OPEN",
-        "url": "https://github.com/Matthew-Calish/mWarsztat/issues/1",
-        "repository": "Matthew-Calish/mWarsztat"
-      },
-      "sub_issues_summary": {
-        "total": 4,
-        "completed": 0,
-        "percent_completed": 0
-      },
-      "sub_issues": [
-        {
-          "number": 15,
-          "title": "WBS - etapy",
-          "state": "OPEN",
-          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/15",
-          "repository": "Matthew-Calish/mWarsztat"
-        },
-        {
-          "number": 16,
-          "title": "WBS - zadania",
-          "state": "OPEN",
-          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/16",
-          "repository": "Matthew-Calish/mWarsztat"
-        },
-        {
-          "number": 17,
-          "title": "Diagram Gantta",
-          "state": "OPEN",
-          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/17",
-          "repository": "Matthew-Calish/mWarsztat"
-        },
-        {
-          "number": 18,
-          "title": "Matryca odpowiedzialności",
-          "state": "OPEN",
-          "url": "https://github.com/Matthew-Calish/mWarsztat/issues/18",
-          "repository": "Matthew-Calish/mWarsztat"
-        }
-      ],
-      "relationships": {
-        "tracked_in_issues": [],
-        "tracked_issues": [],
-        "linked_pull_requests": [],
-        "blocked_by": [
-          {
-            "number": 61,
-            "title": "Karta projektu",
-            "state": "open",
-            "url": "https://github.com/Matthew-Calish/mWarsztat/issues/61"
-          }
-        ],
-        "blocking": [
-          {
-            "number": 66,
-            "title": "Analiza projektu",
-            "state": "open",
-            "url": "https://github.com/Matthew-Calish/mWarsztat/issues/66"
-          }
-        ]
-      },
-      "body": ""
-    },
-    {
       "project_item_id": "PVTI_lAHOCdqmoM4Bpd3nzhFZY7k",
       "type": "Issue",
       "is_archived": false,
@@ -3566,7 +3767,7 @@
       "issue_type": null,
       "author": "Matthew-Calish",
       "created_at": "2026-11-02T13:20:28Z",
-      "updated_at": "2026-11-06T15:34:49Z",
+      "updated_at": "2026-11-06T16:47:21Z",
       "closed_at": null,
       "assignees": [
         "kanvvu",
@@ -3582,7 +3783,14 @@
         "Start date": "2026-11-18",
         "Target date": "2026-11-30"
       },
-      "milestone": null,
+      "milestone": {
+        "number": 1,
+        "title": "Określenie ram projektowych",
+        "state": "OPEN",
+        "due_on": "2026-11-30T00:00:00Z",
+        "description": "",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/milestone/1"
+      },
       "parent_issue": {
         "number": 1,
         "title": "Etap 1",
@@ -3660,7 +3868,7 @@
       "issue_type": null,
       "author": "Matthew-Calish",
       "created_at": "2026-11-02T14:17:43Z",
-      "updated_at": "2026-11-06T15:35:39Z",
+      "updated_at": "2026-11-06T16:47:16Z",
       "closed_at": null,
       "assignees": [
         "kanvvu",
@@ -3676,7 +3884,14 @@
         "Target date": "2026-11-17",
         "Start date": "2026-11-10"
       },
-      "milestone": null,
+      "milestone": {
+        "number": 1,
+        "title": "Określenie ram projektowych",
+        "state": "OPEN",
+        "due_on": "2026-11-30T00:00:00Z",
+        "description": "",
+        "url": "https://github.com/Matthew-Calish/mWarsztat/milestone/1"
+      },
       "parent_issue": {
         "number": 1,
         "title": "Etap 1",
@@ -3719,9 +3934,13 @@
       "issue_type": null,
       "author": "kanvvu",
       "created_at": "2026-10-31T05:35:41Z",
-      "updated_at": "2026-11-05T17:22:57Z",
+      "updated_at": "2026-11-06T17:21:45Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -4028,15 +4247,21 @@
       "issue_type": null,
       "author": "Matthew-Calish",
       "created_at": "2026-11-02T13:20:47Z",
-      "updated_at": "2026-11-05T17:24:24Z",
+      "updated_at": "2026-11-06T16:39:50Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
       "project_fields": {
         "Title": "Analiza interesariuszy",
-        "Status": "Backlog"
+        "Status": "Backlog",
+        "Start date": "2026-11-18",
+        "Target date": "2026-11-23"
       },
       "milestone": null,
       "parent_issue": {
@@ -4131,15 +4356,19 @@
       "issue_type": null,
       "author": "Matthew-Calish",
       "created_at": "2026-11-02T13:21:27Z",
-      "updated_at": "2026-11-05T17:24:22Z",
+      "updated_at": "2026-11-06T16:41:55Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "mesniezek"
+      ],
       "labels": [
         "plane"
       ],
       "project_fields": {
         "Title": "Analiza problemu",
-        "Status": "Backlog"
+        "Status": "Backlog",
+        "Start date": "2026-11-24",
+        "Target date": "2026-11-30"
       },
       "milestone": null,
       "parent_issue": {
@@ -4213,15 +4442,19 @@
       "issue_type": null,
       "author": "Matthew-Calish",
       "created_at": "2026-11-02T13:21:40Z",
-      "updated_at": "2026-11-05T17:23:34Z",
+      "updated_at": "2026-11-06T16:41:48Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu"
+      ],
       "labels": [
         "plane"
       ],
       "project_fields": {
         "Title": "Analiza wymagań",
-        "Status": "Backlog"
+        "Status": "Backlog",
+        "Start date": "2026-11-24",
+        "Target date": "2026-11-30"
       },
       "milestone": null,
       "parent_issue": {
@@ -4281,15 +4514,19 @@
       "issue_type": null,
       "author": "Matthew-Calish",
       "created_at": "2026-11-02T13:21:55Z",
-      "updated_at": "2026-11-05T17:23:24Z",
+      "updated_at": "2026-11-06T16:41:39Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
       "project_fields": {
         "Title": "Modelowanie procesów biznesowych",
-        "Status": "Backlog"
+        "Status": "Backlog",
+        "Target date": "2026-11-30",
+        "Start date": "2026-11-24"
       },
       "milestone": null,
       "parent_issue": {
@@ -4327,15 +4564,19 @@
       "issue_type": null,
       "author": "Matthew-Calish",
       "created_at": "2026-11-02T13:53:27Z",
-      "updated_at": "2026-11-05T17:23:01Z",
+      "updated_at": "2026-11-06T17:19:29Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu"
+      ],
       "labels": [
         "plane"
       ],
       "project_fields": {
         "Title": "Koncepcja bazy danych i wybór środowiska",
-        "Status": "Backlog"
+        "Status": "Backlog",
+        "Target date": "2026-12-16",
+        "Start date": "2026-12-15"
       },
       "milestone": null,
       "parent_issue": {
@@ -4373,9 +4614,13 @@
       "issue_type": null,
       "author": "Matthew-Calish",
       "created_at": "2026-11-02T14:13:34Z",
-      "updated_at": "2026-11-05T17:22:58Z",
+      "updated_at": "2026-11-06T17:21:59Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -4419,9 +4664,13 @@
       "issue_type": null,
       "author": "Matthew-Calish",
       "created_at": "2026-11-02T14:13:48Z",
-      "updated_at": "2026-11-05T17:23:38Z",
+      "updated_at": "2026-11-06T17:22:11Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -4465,9 +4714,13 @@
       "issue_type": null,
       "author": "Matthew-Calish",
       "created_at": "2026-11-02T14:14:00Z",
-      "updated_at": "2026-11-05T17:23:12Z",
+      "updated_at": "2026-11-06T17:22:28Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
@@ -4511,9 +4764,13 @@
       "issue_type": null,
       "author": "Matthew-Calish",
       "created_at": "2026-11-02T14:14:17Z",
-      "updated_at": "2026-11-05T17:24:00Z",
+      "updated_at": "2026-11-06T17:22:48Z",
       "closed_at": null,
-      "assignees": [],
+      "assignees": [
+        "kanvvu",
+        "mesniezek",
+        "Matthew-Calish"
+      ],
       "labels": [
         "plane"
       ],
