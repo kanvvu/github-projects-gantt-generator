@@ -865,7 +865,8 @@ function render() {{
   const noticeEl = document.getElementById('missing-deps-notice');
   if (!hasBlockedByField) {{
     noticeEl.style.display = 'block';
-    noticeEl.innerHTML = '<strong>Uwaga:</strong> Obecny plik <code>project_export.json</code> został wygenerowany przed dodaniem pobierania relacji <code>Blocked by / Blocking</code>. Uruchom ponownie <code>python export_github_project.py --url "https://github.com/users/Matthew-Calish/projects/3"</code>, aby dociągnąć strzałki zależności z GitHuba!';
+    const projUrl = (RAW_DATA.project && RAW_DATA.project.url) ? RAW_DATA.project.url : '<URL_PROJEKTU>';
+    noticeEl.innerHTML = `<strong>Uwaga:</strong> Obecny plik <code>project_export.json</code> został wygenerowany przed dodaniem pobierania relacji <code>Blocked by / Blocking</code>. Uruchom ponownie <code>python export_github_project.py --url "${{escapeXml(projUrl)}}"</code>, aby dociągnąć strzałki zależności z GitHuba!`;
   }} else if (depEdges.length === 0) {{
     noticeEl.style.display = 'block';
     noticeEl.innerHTML = 'W API GitHuba nie znaleziono jeszcze żadnych relacji <code>Blocked by / Blocking</code> dla zadań w tym projekcie. Możesz włączyć u góry opcję <strong>"Strzałki hierarchii (Parent &rarr; Sub-issue)"</strong> lub dodać relacje <em>Blocked by</em> na GitHubie i odświeżyć eksport.';

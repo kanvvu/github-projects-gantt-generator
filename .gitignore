@@ -1,4 +1,15 @@
-__pycache__
+__pycache__/
+*.pyc
+project_export.json
+project_export.csv
+gantt_chart.html
+gantt_chart.png
+*.html
+*.png
+*.svg
+*.json
+*.csv
+
 *.csv
 *.json
 *.png

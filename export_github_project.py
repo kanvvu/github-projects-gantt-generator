@@ -695,7 +695,7 @@ def main() -> None:
     if not owner or not project_number:
         user_input = input(
             "Podaj URL projektu GitHub (np. https://github.com/users/LOGIN/projects/1) "
-            "lub wpisz OWNER/NUMER (np. kamil/1): "
+            "lub wpisz OWNER/NUMER (np. LOGIN/1): "
         ).strip()
         if "github.com" in user_input:
             owner, project_number = parse_project_url(user_input)
