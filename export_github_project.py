@@ -721,12 +721,13 @@ def main() -> None:
     export_to_csv(export_data, csv_path)
 
     gantt_path = f"{args.output_prefix}_gantt.html" if args.output_prefix != "project_export" else "gantt_chart.html"
+    png_path = f"{args.output_prefix}_gantt.png" if args.output_prefix != "project_export" else "gantt_chart.png"
     try:
         try:
             from generate_gantt import generate_gantt_html
         except ImportError:
             from wykres_gantta.generate_gantt import generate_gantt_html
-        gantt_abs = generate_gantt_html(json_path, gantt_path)
+        gantt_abs = generate_gantt_html(json_path, gantt_path, png_path)
     except Exception as exc:
         gantt_abs = f"(Nie udało się wygenerować HTML: {exc})"
 
