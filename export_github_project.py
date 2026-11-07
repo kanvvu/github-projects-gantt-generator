@@ -8,6 +8,7 @@ Nie wymaga instalacji zewnętrznych bibliotek (korzysta wyłącznie ze standardo
 """
 
 import argparse
+import base64
 import concurrent.futures
 import csv
 import json
@@ -16,6 +17,7 @@ import re
 import subprocess
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -538,9 +540,24 @@ def fetch_full_project(token: str, owner: str, project_number: int) -> Dict[str,
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         list(executor.map(_populate_deps, all_items))
 
+    # Pobierz awatary przypisanych użytkowników jako data:image/png;base64 (aby HTML i PNG działały również offline)
+    unique_logins = sorted({u for item in all_items for u in (item.get("assignees") or []) if u})
+    avatars_base64: Dict[str, str] = {}
+    for login in unique_logins:
+        avatar_url = f"https://avatars.githubusercontent.com/{urllib.parse.quote(login)}?size=64"
+        try:
+            req = urllib.request.Request(avatar_url, headers={"User-Agent": "PBL-Gantt-Exporter"})
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                raw = resp.read()
+                ctype = resp.headers.get("Content-Type", "image/png").split(";")[0]
+                avatars_base64[login] = f"data:{ctype};base64,{base64.b64encode(raw).decode('ascii')}"
+        except Exception:
+            pass
+
     return {
         "project": project_meta,
         "total_items": len(all_items),
+        "avatars_base64": avatars_base64,
         "items": all_items,
     }
 

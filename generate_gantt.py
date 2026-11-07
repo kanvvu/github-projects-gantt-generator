@@ -5,12 +5,129 @@ Generuje interaktywny wykres Gantta (HTML + SVG) ze strzałkami zależności
 drzewa WBS (podzadań) na podstawie pliku project_export.json.
 """
 
+import base64
 import json
 import os
+import re
+import shutil
+import subprocess
 import sys
+import urllib.request
+from pathlib import Path
 
 
-def generate_gantt_html(json_path: str = "project_export.json", output_html: str = "gantt_chart.html") -> str:
+def fetch_avatars_base64(items: list) -> dict:
+    """Pobiera awatary przypisanych użytkowników z GitHuba i koduje je jako data:image/png;base64."""
+    logins = set()
+    for it in items:
+        for u in it.get("assignees") or []:
+            if u:
+                logins.add(u)
+
+    avatar_map = {}
+    for login in sorted(logins):
+        url = f"https://avatars.githubusercontent.com/{ urllib.parse.quote(login) }?size=64"
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "PBL-Gantt-Generator"})
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                raw = resp.read()
+                ctype = resp.headers.get("Content-Type", "image/png").split(";")[0]
+                b64 = base64.b64encode(raw).decode("ascii")
+                avatar_map[login] = f"data:{ctype};base64,{b64}"
+        except Exception:
+            pass
+    return avatar_map
+
+
+def find_system_browser() -> str | None:
+    """Znajduje zainstalowaną w systemie przeglądarkę Chromium/Chrome/Edge (działa na Ubuntu GHA oraz Windows)."""
+    candidates = [
+        "google-chrome",
+        "google-chrome-stable",
+        "chromium",
+        "chromium-browser",
+        "msedge",
+        "chrome",
+    ]
+    for cmd in candidates:
+        found = shutil.which(cmd)
+        if found:
+            return found
+
+    win_paths = [
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+        r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+    ]
+    for p in win_paths:
+        if os.path.exists(p):
+            return p
+    return None
+
+
+def render_png_from_html(html_path: str, png_path: str) -> str | None:
+    """Renderuje wygenerowany plik HTML (w trybie ?export=1) bezpośrednio do pliku PNG za pomocą systemowej przeglądarki."""
+    browser = find_system_browser()
+    if not browser:
+        return None
+
+    abs_html = os.path.abspath(html_path)
+    abs_png = os.path.abspath(png_path)
+    file_url = Path(abs_html).as_uri() + "?export=1"
+
+    base_flags = [
+        browser,
+        "--headless",
+        "--disable-gpu",
+        "--no-sandbox",
+        "--hide-scrollbars",
+    ]
+
+    # 1) Pobierz wyrenderowany DOM, aby odczytać dokładne wymiary width i height elementu <svg id="gantt-svg">
+    width, height = 2200, 720
+    try:
+        proc = subprocess.run(
+            base_flags + ["--dump-dom", file_url],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="ignore",
+            timeout=20,
+        )
+        m = re.search(r'<svg[^>]*id="gantt-svg"[^>]*width="(\d+)"[^>]*height="(\d+)"', proc.stdout)
+        if m:
+            width = int(m.group(1))
+            height = int(m.group(2))
+    except Exception:
+        pass
+
+    # 2) Zapisz zrzut PNG w jakości 2x Retina o dokładnych wymiarach wykresu SVG
+    try:
+        subprocess.run(
+            base_flags
+            + [
+                "--force-device-scale-factor=2",
+                f"--window-size={width},{height}",
+                f"--screenshot={abs_png}",
+                file_url,
+            ],
+            capture_output=True,
+            timeout=25,
+            check=False,
+        )
+        if os.path.exists(abs_png):
+            return abs_png
+    except Exception:
+        pass
+    return None
+
+
+def generate_gantt_html(
+    json_path: str = "project_export.json",
+    output_html: str = "gantt_chart.html",
+    output_png: str | None = None,
+) -> str:
     if not os.path.exists(json_path):
         raise FileNotFoundError(f"Nie znaleziono pliku {json_path}. Uruchom najpierw export_github_project.py.")
 
@@ -18,6 +135,8 @@ def generate_gantt_html(json_path: str = "project_export.json", output_html: str
         data = json.load(f)
 
     embedded_json = json.dumps(data, ensure_ascii=False)
+    avatars_b64 = data.get("avatars_base64") or fetch_avatars_base64(data.get("items", []))
+    avatar_map_json = json.dumps(avatars_b64, ensure_ascii=False)
 
     html_content = f"""<!DOCTYPE html>
 <html lang="pl">
@@ -323,6 +442,7 @@ def generate_gantt_html(json_path: str = "project_export.json", output_html: str
 
 <script>
 const RAW_DATA = {embedded_json};
+const AVATAR_MAP = {avatar_map_json};
 
 // Zbiór numerów zadań, które mają aktualnie zwinięte (schowane) podzadania
 const collapsedNodes = new Set();
@@ -1109,13 +1229,14 @@ function render() {{
         const by = y + 9;
         const bClipId = `bar-avatar-clip-${{item.number}}-${{aIdx}}`;
         const initials = (login || '?').slice(0, 2).toUpperCase();
+        const avatarHref = AVATAR_MAP[login] || `https://avatars.githubusercontent.com/${{encodeURIComponent(login)}}?size=48`;
         barAvatarsSvg += `
           <clipPath id="${{bClipId}}">
             <circle cx="${{bx + 9}}" cy="${{by + 9}}" r="9" />
           </clipPath>
           <circle cx="${{bx + 9}}" cy="${{by + 9}}" r="9" fill="${{T.toggleBg}}" />
           <text x="${{bx + 9}}" y="${{by + 12}}" font-size="7.5" font-weight="700" text-anchor="middle" fill="${{T.textMuted}}">${{escapeXml(initials)}}</text>
-          <image data-login="${{escapeXml(login)}}" href="https://avatars.githubusercontent.com/${{encodeURIComponent(login)}}?size=48" x="${{bx}}" y="${{by}}" width="18" height="18" clip-path="url(#${{bClipId}})" />
+          <image data-login="${{escapeXml(login)}}" href="${{avatarHref}}" onerror="this.remove()" x="${{bx}}" y="${{by}}" width="18" height="18" clip-path="url(#${{bClipId}})" />
           <circle cx="${{bx + 9}}" cy="${{by + 9}}" r="9" fill="none" stroke="${{T.avatarRing}}" stroke-width="1" />
         `;
         barAvatarOffset += 17;
@@ -1506,6 +1627,18 @@ document.getElementById('day-width').addEventListener('change', render);
 
 // Domyślnie na starcie zwijamy podzadania do widoku: Etap -> Podetapy
 collapseToDepth(1);
+
+// Tryb czystego eksportu wykresu SVG (?export=1) dla automatycznego zapisu PNG bez pasków narzędzi i marginesów
+if (window.location.search.includes('export=1')) {{
+  const svgEl = document.getElementById('gantt-svg');
+  if (svgEl) {{
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.overflow = 'hidden';
+    document.body.innerHTML = '';
+    document.body.appendChild(svgEl);
+  }}
+}}
 </script>
 </body>
 </html>
@@ -1514,11 +1647,17 @@ collapseToDepth(1);
     with open(output_html, "w", encoding="utf-8") as f:
         f.write(html_content)
 
+    if output_png:
+        png_res = render_png_from_html(output_html, output_png)
+        if png_res:
+            print(f"Wygenerowano obraz PNG wykresu Gantta: {png_res}")
+
     return os.path.abspath(output_html)
 
 
 if __name__ == "__main__":
     json_file = sys.argv[1] if len(sys.argv) > 1 else "project_export.json"
     out_file = sys.argv[2] if len(sys.argv) > 2 else "gantt_chart.html"
-    path = generate_gantt_html(json_file, out_file)
+    png_file = sys.argv[3] if len(sys.argv) > 3 else os.path.splitext(out_file)[0] + ".png"
+    path = generate_gantt_html(json_file, out_file, png_file)
     print(f"Wygenerowano interaktywny wykres Gantta: {path}")
