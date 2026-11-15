@@ -347,6 +347,33 @@ def generate_gantt_html(
     color: var(--dep-arrow);
     font-weight: 700;
   }}
+  .latex-header {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 12px;
+  }}
+  .latex-header h3 {{
+    margin: 0;
+  }}
+  .latex-textarea {{
+    width: 100%;
+    min-height: 320px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.5;
+    resize: vertical;
+    outline: none;
+  }}
+  .latex-textarea:focus {{
+    border-color: #3b82f6;
+  }}
 
   #tooltip {{
     position: fixed;
@@ -436,6 +463,14 @@ def generate_gantt_html(
 <div class="deps-summary" id="deps-summary">
   <h3 id="deps-title">Wykryte zależności (strzałki)</h3>
   <div class="deps-list" id="deps-list"></div>
+</div>
+
+<div class="deps-summary" id="latex-summary">
+  <div class="latex-header">
+    <h3>Struktura zadań WBS w formacie LaTeX (Overleaf)</h3>
+    <button class="btn" id="copy-latex-btn" onclick="copyLatexToClipboard()">📋 Kopiuj do schowka</button>
+  </div>
+  <textarea id="latex-output" class="latex-textarea" readonly spellcheck="false"></textarea>
 </div>
 
 <div id="tooltip"></div>
@@ -1451,6 +1486,123 @@ function render() {{
         </div>
       `;
     }}).join('');
+  }}
+
+  const latexEl = document.getElementById('latex-output');
+  if (latexEl && !latexEl.value) {{
+    latexEl.value = generateLatexWBS();
+  }}
+}}
+
+const STAGE_FULL_TITLES = {{
+  'etap 1': 'Koncepcja i~definicja projektu',
+  'etap 2': 'Specyfikacja techniczna systemu',
+  'etap 3': 'Weryfikacja i~zamknięcie dokumentacji'
+}};
+
+function formatLatexText(text) {{
+  if (!text) return '';
+  let s = String(text).trim();
+  // Zabezpiecz ewentualne znaki specjalne LaTeX przed kompilacją
+  s = s.replace(/([&%$#_])/g, '\\\\$1');
+  // Zamień polskie spójniki i przyimki jednoliterowe na twardą spację LaTeX (~)
+  s = s.replace(/(^|\\s)([iwzaouIWZAOU])\\s+/g, '$1$2~');
+  // Powtórz dla następujących po sobie jednoliterowych słów (np. "a w projekcie")
+  s = s.replace(/~([iwzaouIWZAOU])\\s+/g, '~$1~');
+  return s;
+}}
+
+function getOrderedSubtreeChildren(parentNum) {{
+  const {{ byNum, childrenMap }} = MODEL;
+  const parentItem = byNum.get(parentNum);
+  const directSet = new Set(childrenMap.get(parentNum) || []);
+  const orderedNums = [];
+
+  if (parentItem && Array.isArray(parentItem.sub_issues) && parentItem.sub_issues.length > 0) {{
+    parentItem.sub_issues.forEach(sub => {{
+      if (sub && sub.number != null && directSet.has(sub.number)) {{
+        orderedNums.push(sub.number);
+        directSet.delete(sub.number);
+      }}
+    }});
+  }}
+  directSet.forEach(rem => orderedNums.push(rem));
+  return orderedNums;
+}}
+
+function generateLatexWBS() {{
+  const {{ byNum, roots }} = MODEL;
+  const lines = [];
+  lines.push('\\\\begin{{enumerate}}[label=\\\\textbf{{Etap \\\\arabic*:}}, ref=\\\\arabic*, leftmargin=0pt, itemindent=*, itemsep=22pt, topsep=6pt, parsep=0pt, partopsep=0pt]');
+  lines.push('');
+
+  roots.forEach((stage) => {{
+    const rawStageTitle = (stage.title || '').trim();
+    const normKey = rawStageTitle.toLowerCase();
+    const stageTitle = STAGE_FULL_TITLES[normKey] || formatLatexText(rawStageTitle);
+    lines.push(`    \\\\item \\\\textbf{{${{stageTitle}}}}`);
+
+    const level2Nums = getOrderedSubtreeChildren(stage.number);
+    if (level2Nums.length > 0) {{
+      lines.push('    \\\\begin{{enumerate}}[label=\\\\textbf{{\\\\theenumi.\\\\arabic*.}}, ref=\\\\theenumi.\\\\arabic*, leftmargin=1.1cm, labelwidth=0.9cm, labelsep=0.2cm, align=left, itemsep=12pt, topsep=6pt, parsep=0pt, partopsep=0pt]');
+      level2Nums.forEach(l2Num => {{
+        const l2Item = byNum.get(l2Num);
+        if (!l2Item) return;
+        const l2Title = formatLatexText(l2Item.title || '');
+        lines.push(`        \\\\item \\\\textbf{{${{l2Title}}}}`);
+
+        const level3Nums = getOrderedSubtreeChildren(l2Num);
+        if (level3Nums.length > 0) {{
+          const hasAnyLevel4 = level3Nums.some(l3Num => getOrderedSubtreeChildren(l3Num).length > 0);
+          const l3ItemSep = hasAnyLevel4 ? '8pt' : '3pt';
+          const l3Ref = hasAnyLevel4 ? ' ref=\\\\theenumii.\\\\arabic*,' : '';
+          lines.push(`        \\\\begin{{enumerate}}[label=\\\\theenumii.\\\\arabic*.,${{l3Ref}} leftmargin=1.4cm, labelwidth=1.2cm, labelsep=0.2cm, align=left, itemsep=${{l3ItemSep}}, topsep=4pt, parsep=0pt, partopsep=0pt]`);
+          level3Nums.forEach(l3Num => {{
+            const l3Item = byNum.get(l3Num);
+            if (!l3Item) return;
+            const l3Title = formatLatexText(l3Item.title || '');
+            const level4Nums = getOrderedSubtreeChildren(l3Num);
+
+            if (level4Nums.length > 0) {{
+              lines.push(`            \\\\item \\\\textbf{{${{l3Title}}}}`);
+              lines.push('            \\\\begin{{enumerate}}[label=\\\\alph*), ref=\\\\theenumiii.\\\\alph*, leftmargin=0.65cm, labelwidth=0.45cm, labelsep=0.2cm, align=left, itemsep=2pt, topsep=3pt, parsep=0pt, partopsep=0pt]');
+              level4Nums.forEach(l4Num => {{
+                const l4Item = byNum.get(l4Num);
+                if (!l4Item) return;
+                const l4Title = formatLatexText(l4Item.title || '');
+                lines.push(`                \\\\item ${{l4Title}}`);
+              }});
+              lines.push('            \\\\end{{enumerate}}');
+            }} else {{
+              lines.push(`            \\\\item ${{l3Title}}`);
+            }}
+          }});
+          lines.push('        \\\\end{{enumerate}}');
+        }}
+      }});
+      lines.push('    \\\\end{{enumerate}}');
+    }}
+    lines.push('');
+  }});
+
+  lines.push('\\\\end{{enumerate}}');
+  return lines.join('\\n');
+}}
+
+async function copyLatexToClipboard() {{
+  const textarea = document.getElementById('latex-output');
+  const btn = document.getElementById('copy-latex-btn');
+  if (!textarea) return;
+  try {{
+    await navigator.clipboard.writeText(textarea.value);
+  }} catch (e) {{
+    textarea.select();
+    document.execCommand('copy');
+  }}
+  if (btn) {{
+    const orig = btn.textContent;
+    btn.textContent = '✅ Skopiowano do schowka!';
+    setTimeout(() => {{ btn.textContent = orig; }}, 2000);
   }}
 }}
 
