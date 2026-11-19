@@ -1741,7 +1741,7 @@ async function downloadPNG() {{
         const pngUrl = URL.createObjectURL(pngBlob);
         const a = document.createElement('a');
         a.href = pngUrl;
-        a.download = 'pbl_gantt.png';
+        a.download = 'Wykres_Gantta_Dokumentacja.png';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -1766,7 +1766,7 @@ function downloadSVG() {{
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'gantt_chart.svg';
+  a.download = 'Wykres_Gantta_Dokumentacja.svg';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
